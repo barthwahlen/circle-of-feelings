@@ -623,13 +623,21 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
     transform: rotate(-90deg) translateY(28px);
   }
 
-  /* no per-segment GPU layers on mobile — opacity only, no filter */
+  /* backdrop-filter already set in base; no background override on mobile */
+}
+
+/* ═══ MOBILE — no per-segment GPU layers (any orientation) ═══════════════════
+   The drop-shadow on .seg.hi allocates a separate GPU compositing layer per
+   highlighted segment. On iPhone Safari this combined with the overlay's
+   backdrop-filter tips the per-tab GPU budget — the WebContent process is
+   killed and you get "a problem repeatedly occurred". This used to live
+   inside the portrait media query, but landscape needs the same treatment;
+   that's why the crash is landscape-only on iPhone. */
+@media (max-width: 932px) {
   .seg { transition: opacity 0.14s ease; }
   .seg:hover { filter: none; }
   .seg.hi    { filter: none; opacity: 1; }
   .seg.dim   { filter: none; opacity: 0.65; }
-
-  /* backdrop-filter already set in base; no background override on mobile */
 }
 
 

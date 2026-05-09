@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Typography — Circle of Feelings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font-body:    'DM Sans', sans-serif;
+    --font-heading: 'Host Grotesk', sans-serif;
+    --bg:    #0e0e1a;
+    --surface: #16162a;
+    --border: rgba(255,255,255,0.09);
+    --text:  rgba(255,255,255,0.88);
+    --muted: rgba(255,255,255,0.38);
+    --accent: rgba(160,190,255,0.85);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 48px 32px 96px;
+  }
+
+  h1 {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  /* ── Section ── */
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Font samples ── */
+  .font-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+  }
+  .font-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+  }
+  .font-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .font-sample-body    { font-family: var(--font-body);    font-size: 28px; font-weight: 400; }
+  .font-sample-heading { font-family: var(--font-heading); font-size: 28px; font-weight: 400; }
+  .font-weights {
+    display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .fw { font-size: 13px; color: var(--muted); }
+  .fw span { color: var(--text); margin-right: 4px; }
+
+  /* ── Table ── */
+  .type-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .type-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .type-table td {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .type-table tr:last-child td { border-bottom: none; }
+  .type-table tr:hover td { background: rgba(255,255,255,0.025); }
+
+  .td-label {
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    width: 180px;
+  }
+  .td-where {
+    padding: 6px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+    width: 160px;
+  }
+  .td-spec {
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--accent);
+    font-family: monospace;
+    white-space: nowrap;
+    width: 320px;
+  }
+  .td-specimen {
+    padding: 14px 20px;
+    width: 100%;
+  }
+
+  /* group header row */
+  .group-row td {
+    padding: 20px 16px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.22);
+    border-bottom: none;
+  }
+
+  /* ── Specimens (mirror real app styles) ── */
+  .sp-page-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .sp-page-sub {
+    font-size: clamp(18px, 1.44vw, 21px);
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .sp-ifeel {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #333;
+    background: #fff;
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+  .sp-lc {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .sp-lm {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .sp-lo {
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+  }
+  .sp-breadcrumb-title {
+    font-family: var(--font-heading);
+    font-size: clamp(21px, 1.875vw, 28px);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .sp-breadcrumb-text {
+    font-size: clamp(19px, 1.625vw, 24px);
+    font-weight: 400;
+  }
+  .sp-overlay-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.875rem, 2.75vw, 2.75rem);
+    font-weight: 600;
+  }
+  .sp-overlay-section {
+    font-size: clamp(18px, 1.44vw, 21px);
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .sp-overlay-body {
+    font-size: clamp(18px, 1.44vw, 21px);
+    font-weight: 400;
+    line-height: 1.35;
+  }
+  .sp-tab {
+    font-family: var(--font-heading);
+    font-size: clamp(15px, 1.25vw, 18px);
+    font-weight: 400;
+    letter-spacing: 0.6px;
+    text-transform: lowercase;
+  }
+  .sp-info-body {
+    font-size: clamp(17px, 1.44vw, 21px);
+    font-weight: 400;
+    line-height: 1.35;
+  }
+  .sp-info-sig {
+    font-size: clamp(14px, 1.1vw, 17px);
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    color: var(--muted);
+  }
+  .sp-more-link {
+    font-size: clamp(15px, 1.125vw, 18px);
+    font-weight: 400;
+    letter-spacing: 0.2px;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<h1>Circle of Feelings — Typography</h1>
+<p class="subtitle">Reference · sizes, weights &amp; spacing</p>
+
+<!-- Fonts -->
+<div class="section">
+  <div class="section-title">Typefaces</div>
+  <div class="font-grid">
+    <div class="font-card">
+      <div class="font-label">Heading — Host Grotesk</div>
+      <div class="font-sample-heading">Aa Bb Cc 123</div>
+      <div class="font-weights">
+        <div class="fw" style="font-family:var(--font-heading);font-weight:300"><span>300</span>Light</div>
+        <div class="fw" style="font-family:var(--font-heading);font-weight:400"><span>400</span>Regular</div>
+        <div class="fw" style="font-family:var(--font-heading);font-weight:500"><span>500</span>Medium</div>
+        <div class="fw" style="font-family:var(--font-heading);font-weight:600"><span>600</span>Semi</div>
+        <div class="fw" style="font-family:var(--font-heading);font-weight:700"><span>700</span>Bold</div>
+      </div>
+    </div>
+    <div class="font-card">
+      <div class="font-label">Body — DM Sans</div>
+      <div class="font-sample-body">Aa Bb Cc 123</div>
+      <div class="font-weights">
+        <div class="fw" style="font-weight:300"><span>300</span>Light</div>
+        <div class="fw" style="font-weight:400"><span>400</span>Regular</div>
+        <div class="fw" style="font-weight:500"><span>500</span>Medium</div>
+        <div class="fw" style="font-weight:600"><span>600</span>Semi</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="section">
+  <div class="section-title">Type inventory</div>
+  <table class="type-table">
+    <thead>
+      <tr>
+        <th>Element</th>
+        <th>Where</th>
+        <th>Size · Line-height · Weight</th>
+        <th>Specimen</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- PAGE -->
+      <tr class="group-row"><td colspan="4">Page</td></tr>
+      <tr>
+        <td class="td-label">Page title</td>
+        <td class="td-where">Header</td>
+        <td class="td-spec">2.5rem · — · 600 · ls 1px<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-page-title">Circle of Feelings</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Page subtitle</td>
+        <td class="td-where">Header</td>
+        <td class="td-spec">clamp(18px, 1.44vw, 21px) · — · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-page-sub">An emotion wheel</span></td>
+      </tr>
+
+      <!-- WHEEL -->
+      <tr class="group-row"><td colspan="4">Wheel</td></tr>
+      <tr>
+        <td class="td-label">"I feel…"</td>
+        <td class="td-where">Centre</td>
+        <td class="td-spec">18px · — · 600 · ls 0.3px<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-ifeel">I feel…</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Core emotions</td>
+        <td class="td-where">Ring 1</td>
+        <td class="td-spec">17px · — · 600<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-lc">Joy · Sadness · Fear · Anger</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Mid emotions</td>
+        <td class="td-where">Ring 2</td>
+        <td class="td-spec">14px · — · 500 · ls 0.2px<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-lm">Serenity · Optimism · Love · Submission</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Outer emotions</td>
+        <td class="td-where">Ring 3</td>
+        <td class="td-spec">12px · — · 400 · ls 0.1px<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-lo">Interested · Trusting · Accepted · Peaceful</span></td>
+      </tr>
+
+      <!-- BREADCRUMB -->
+      <tr class="group-row"><td colspan="4">Breadcrumb bar</td></tr>
+      <tr>
+        <td class="td-label">Selected title</td>
+        <td class="td-where">Info bar</td>
+        <td class="td-spec">21–28px · — · 600 · ls 0.5px<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-breadcrumb-title">Joyful</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Breadcrumb text</td>
+        <td class="td-where">Info bar</td>
+        <td class="td-spec">19–24px · — · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-breadcrumb-text">Joy → Optimism → Hopeful</span></td>
+      </tr>
+
+      <!-- EMOTION OVERLAY -->
+      <tr class="group-row"><td colspan="4">Emotion overlay</td></tr>
+      <tr>
+        <td class="td-label">Emotion name</td>
+        <td class="td-where">Overlay heading</td>
+        <td class="td-spec">30–44px · — · 600<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-overlay-heading">Joyful</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Section label</td>
+        <td class="td-where">Overlay</td>
+        <td class="td-spec">clamp(18px, 1.44vw, 21px) · — · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-overlay-section">Similar emotions</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Body text</td>
+        <td class="td-where">Overlay</td>
+        <td class="td-spec">18–21px · 1.35 · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-overlay-body">Elated, radiant, gleeful, blissful, exuberant</span></td>
+      </tr>
+
+      <!-- HELP OVERLAY -->
+      <tr class="group-row"><td colspan="4">Help overlay</td></tr>
+      <tr>
+        <td class="td-label">Body text</td>
+        <td class="td-where">Help panel</td>
+        <td class="td-spec">18–21px · 1.35 · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-overlay-body">Tap any segment to explore what you're feeling</span></td>
+      </tr>
+
+      <!-- INFO OVERLAY -->
+      <tr class="group-row"><td colspan="4">Info overlay</td></tr>
+      <tr>
+        <td class="td-label">Tab labels</td>
+        <td class="td-where">Tab bar</td>
+        <td class="td-spec">15–18px · — · 400 · ls 0.6px · lowercase<br>Host Grotesk</td>
+        <td class="td-specimen"><span class="sp-tab">about &nbsp;&nbsp; purpose &nbsp;&nbsp; resources</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Body text</td>
+        <td class="td-where">About / Purpose</td>
+        <td class="td-spec">17–21px · 1.35 · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-info-body">A few years ago I realised I couldn't answer a simple question.</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Signature</td>
+        <td class="td-where">About panel</td>
+        <td class="td-spec">14–17px · — · 400 · ls 0.3px<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-info-sig">— Barth, 2026</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Resource body</td>
+        <td class="td-where">Resources panel</td>
+        <td class="td-spec">17–21px · 1.35 · 400<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-info-body">Lisa Feldman Barrett's landmark book on the science of emotion</span></td>
+      </tr>
+      <tr>
+        <td class="td-label">Resource link</td>
+        <td class="td-where">Resources panel</td>
+        <td class="td-spec">15–18px · — · 400 · ls 0.2px<br>DM Sans</td>
+        <td class="td-specimen"><span class="sp-more-link">lisafeldmanbarrett.com ↗</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+</body>
+</html>

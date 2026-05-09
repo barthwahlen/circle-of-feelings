@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Old backup convention — superseded by git
+*.backup*.html
+
+# Per-machine Claude Code settings (permission grants, etc.)
+**/settings.local.json

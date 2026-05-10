@@ -199,32 +199,6 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 .lbl.lm  { font-family: var(--font-heading); font-size: 14px; font-weight: 500; letter-spacing: 0.2px; }
 .lbl.lo  { font-family: var(--font-heading); font-size: 12px; font-weight: 400; letter-spacing: 0.1px; }
 
-/* ── Info bar ── */
-#panel { display: none; }
-
-#info-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 clamp(20px, 3vw, 36px);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 40px;
-  height: 63px;
-  justify-content: center;
-  font-size: clamp(19px, 1.625vw, 24px);
-  font-weight: 400;
-  color: var(--text);
-  transition: all 0.2s;
-}
-
-#info-bar .empty  { color: var(--muted); font-size: clamp(18px, 1.5vw, 21px); }
-#info-bar .title  { font-family: var(--font-heading); font-size: clamp(21px, 1.875vw, 28px); font-weight: 600; letter-spacing: 0.5px; color: var(--text); }
-#info-bar .ic     { font-size: clamp(19px, 1.625vw, 24px); }
-#info-bar .arr    { color: var(--muted); font-size: clamp(21px, 1.875vw, 28px); line-height: 1; }
-#info-bar .im     { font-size: clamp(19px, 1.625vw, 24px); }
-#info-bar .io     { font-size: clamp(19px, 1.625vw, 24px); opacity: 0.8; }
-
 /* ── Fixed icon buttons (help + language) ── */
 .icon-btn {
   position: fixed;
@@ -603,14 +577,13 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   color: var(--caption);
   letter-spacing: 0.3px;
 }
-
-/* Purpose panel (was: why) */
-#info-panel-purpose p {
-  font-size: clamp(18px, 1.5vw, 21px); line-height: 1.35;
-  color: var(--body-text);
-  margin: 0 0 clamp(14px, 1.5vw, 22px);
+.info-subheading {
+  font-family: var(--font-heading);
+  font-size: clamp(17px, 1.44vw, 21px);
+  font-weight: 600;
+  color: var(--text);
+  margin: clamp(24px, 2.5vw, 36px) 0 clamp(13px, 1.4vw, 20px);
 }
-#info-panel-purpose p:last-child { margin-bottom: 0; }
 
 /* More panel */
 #info-panel-more .more-items {
@@ -739,10 +712,6 @@ html.resizing .blur-floor {
 </div>
 <div id="pointer-mobile"></div>
 
-<div id="panel">
-  <div id="info-bar"><span class="title">Circle of Feelings</span></div>
-</div>
-
 <button id="theme-btn" class="icon-btn" aria-label="Toggle theme"><span id="theme-icon">☀</span></button>
 <button id="help-btn" class="icon-btn" aria-label="Info">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -822,7 +791,6 @@ html.resizing .blur-floor {
     <div id="info-tabs" role="tablist">
       <button class="info-tab active" data-tab="how"     role="tab" aria-selected="true">use</button>
       <button class="info-tab"        data-tab="about"   role="tab" aria-selected="false">about</button>
-      <button class="info-tab"        data-tab="purpose" role="tab" aria-selected="false">purpose</button>
       <button class="info-tab"        data-tab="more"    role="tab" aria-selected="false">resources</button>
     </div>
     <h2 id="help-title">How to use</h2>
@@ -830,8 +798,6 @@ html.resizing .blur-floor {
     <div id="info-panel-how" class="info-panel active" role="tabpanel"></div>
     <!-- ABOUT -->
     <div id="info-panel-about" class="info-panel" role="tabpanel"></div>
-    <!-- PURPOSE -->
-    <div id="info-panel-purpose" class="info-panel" role="tabpanel"></div>
     <!-- RESOURCES -->
     <div id="info-panel-more" class="info-panel" role="tabpanel"></div>
   </div>
@@ -1108,7 +1074,6 @@ function lighten(hex, t) {
 
 /* ─── BUILD DOM ──────────────────────────────────────────────────────────── */
 const wheel   = document.getElementById('wheel');
-const infoBar = document.getElementById('info-bar');
 const allSegs = [];
 let currentRotation = 0;
 let wheelScale = 1;
@@ -3517,34 +3482,34 @@ function renderHelpOverlay() {
   const tabs = document.querySelectorAll('.info-tab');
   tabs[0].textContent = h.howTab ?? h.howTitle;
   tabs[1].textContent = d.tabs[0]; // about
-  tabs[2].textContent = d.tabs[1]; // purpose
-  tabs[3].textContent = d.tabs[2]; // resources
+  tabs[2].textContent = d.tabs[1]; // resources
 
   // Store localised title on each panel for heading updates
-  const panelHow     = document.getElementById('info-panel-how');
-  const panelAbout   = document.getElementById('info-panel-about');
-  const panelPurpose = document.getElementById('info-panel-purpose');
-  const panelMore    = document.getElementById('info-panel-more');
+  const panelHow   = document.getElementById('info-panel-how');
+  const panelAbout = document.getElementById('info-panel-about');
+  const panelMore  = document.getElementById('info-panel-more');
 
-  panelHow.dataset.title     = h.howTitle;
-  panelAbout.dataset.title   = d.aboutTitle;
-  panelPurpose.dataset.title = d.purposeTitle;
-  panelMore.dataset.title    = d.moreTitle;
+  panelHow.dataset.title   = h.howTitle;
+  panelAbout.dataset.title = d.purposeTitle;
+  panelMore.dataset.title  = d.moreTitle;
 
   // Update heading to match currently active panel
   const activePanel = document.querySelector('.info-panel.active');
   document.getElementById('help-title').textContent = activePanel?.dataset.title ?? h.howTitle;
 
   // Rebuild how panel
-  panelHow.innerHTML = h.howItems.map(([k, v]) => `<p><strong>${k}</strong> — ${v}</p>`).join('');
+  panelHow.innerHTML = h.howHTML
+    ? h.howHTML
+    : h.howItems.map(([k, v]) => `<p><strong>${k}</strong> — ${v}</p>`).join('');
 
-  // Rebuild about panel
+  // Rebuild about panel: intro paras, optional science block, then personal subheading + story
   const last = d.aboutParas.length - 1;
-  panelAbout.innerHTML = d.aboutParas.slice(0, last).map(p => `<p>${p}</p>`).join('')
+  panelAbout.innerHTML = d.purposeParas.map(p => `<p>${p}</p>`).join('')
+                       + (d.scienceTitle ? `<h3 class="info-subheading">${d.scienceTitle}</h3>` : '')
+                       + (d.scienceParas ? d.scienceParas.map(p => `<p>${p}</p>`).join('') : '')
+                       + `<h3 class="info-subheading">${d.aboutTitle}</h3>`
+                       + d.aboutParas.slice(0, last).map(p => `<p>${p}</p>`).join('')
                        + `<p class="info-sig">${d.aboutParas[last]}</p>`;
-
-  // Rebuild purpose panel
-  panelPurpose.innerHTML = d.purposeParas.map(p => `<p>${p}</p>`).join('');
 
   // Rebuild resources panel
   panelMore.innerHTML =
@@ -3807,173 +3772,215 @@ function tUI(key)   { return LANG_DATA[currentLang]?.[key] ?? LANG_DATA.en[key] 
 
 /* ─── HELP OVERLAY TRANSLATIONS ─────────────────────────────────────────── */
 const HELP_MORE_URLS = [
-  ['https://lisafeldmanbarrett.com/books/how-emotions-are-made/', 'lisafeldmanbarrett.com ↗'],
-  ['https://www.marcbrackett.com/permission-to-feel/',            'marcbrackett.com ↗'],
-  ['https://danielgolemanemotionalintelligence.com/',             'danielgolemanemotionalintelligence.com ↗'],
-  ['http://atlasofemotions.org',                                  'atlasofemotions.org ↗'],
-  ['https://pubmed.ncbi.nlm.nih.gov/17728420/',                   'pubmed.ncbi.nlm.nih.gov ↗'],
-  ['https://www.apa.org/pubs/journals/features/psp-a0030898.pdf', 'apa.org ↗'],
+  ['https://lisafeldmanbarrett.com/books/how-emotions-are-made/', 'lisafeldmanbarrett.com'],
+  ['https://www.marcbrackett.com/permission-to-feel/',            'marcbrackett.com'],
+  ['https://danielgolemanemotionalintelligence.com/',             'danielgolemanemotionalintelligence.com'],
+  ['http://atlasofemotions.org',                                  'atlasofemotions.org'],
+  ['https://pubmed.ncbi.nlm.nih.gov/17728420/',                   'pubmed.ncbi.nlm.nih.gov'],
+  ['https://www.apa.org/pubs/journals/features/psp-a0030898.pdf', 'apa.org'],
 ];
 
 const HELP_DATA = {
   en: {
     howTab: 'use', howTitle: 'How to use',
-    howItems: [
-      ['Three rings', 'Start by choosing a core emotion from the inner ring, then move outward to identify a more specific feeling. When something resonates with how you\'re feeling right now, click or tap on it to explore it more deeply.'],
-      ['Spin',        'click and drag the circle to spin it freely'],
-      ['Select',      'click any segment to snap it to the pointer and name it below'],
-      ['Learn',       'click the highlighted emotion name to open its full description'],
-      ['Dismiss',     'press Escape or click outside the circle to clear your selection'],
-    ],
+    howHTML: `
+      <p>Explore and learn about emotions by clicking or spinning the wheel.</p>
+      <p>Understanding feelings isn't always straightforward. This tool is here to help you make sense of what's going on inside.</p>
+      <p>Use it on your own or with someone else to build a clearer emotional vocabulary and feel more confident expressing yourself.</p>
+      <h3 class="info-subheading">Navigating the circle</h3>
+      <p>The circle is designed in three rings, moving from broad emotions to more specific ones.</p>
+<p>As you move outward, you're gently narrowing in on what feels true for you.</p>
+      <p>You might also notice how emotions sit next to each other, opposite from each other, or blend together.</p>
+      <p>Feelings aren't always separate; they can overlap, shift, and evolve.</p>
+    `,
   },
   fr: {
     howTab: 'utiliser', howTitle: 'Mode d\'emploi',
-    howItems: [
-      ['Trois anneaux', 'l\'anneau intérieur représente les émotions de base, le central des sentiments plus précis, l\'extérieur des variations nuancées'],
-      ['Tourner',       'cliquer et faire glisser le cercle pour le faire tourner librement'],
-      ['Sélectionner',  'cliquer sur un segment pour le centrer sur le pointeur et le nommer en bas'],
-      ['Apprendre',     'cliquer sur le nom de l\'émotion mis en évidence pour ouvrir sa description complète'],
-      ['Fermer',        'appuyer sur Échap ou cliquer en dehors du cercle pour effacer la sélection'],
-    ],
+    howHTML: `
+      <p>Explorez les émotions et apprenez à les connaître en cliquant sur la roue ou en la faisant tourner.</p>
+      <p>Comprendre ses sentiments n'est pas toujours simple. Cet outil est là pour vous aider à démêler ce qui se passe en vous.</p>
+      <p>Utilisez-le seul ou avec quelqu'un d'autre pour enrichir votre vocabulaire émotionnel et vous exprimer avec plus d'assurance.</p>
+      <h3 class="info-subheading">Naviguer dans le cercle</h3>
+      <p>Le cercle est conçu en trois anneaux, allant des émotions larges vers des émotions plus précises.</p>
+      <p>En vous déplaçant vers l'extérieur, vous affinez doucement ce qui vous semble juste.</p>
+      <p>Vous remarquerez peut-être aussi comment certaines émotions se trouvent côte à côte, à l'opposé les unes des autres, ou se mêlent ensemble.</p>
+      <p>Les sentiments ne sont pas toujours distincts&nbsp;; ils peuvent se chevaucher, évoluer et se transformer.</p>
+    `,
   },
   es: {
     howTab: 'usar', howTitle: 'Cómo usarlo',
-    howItems: [
-      ['Tres anillos', 'el anillo interior muestra emociones básicas, el central sentimientos más específicos, el exterior variaciones matizadas'],
-      ['Girar',        'hacer clic y arrastrar el círculo para hacerlo girar libremente'],
-      ['Seleccionar',  'hacer clic en cualquier segmento para centrarlo en el cursor y nombrarlo abajo'],
-      ['Aprender',     'hacer clic en el nombre de la emoción resaltada para abrir su descripción completa'],
-      ['Cerrar',       'pulsar Escape o hacer clic fuera del círculo para borrar la selección'],
-    ],
+    howHTML: `
+      <p>Explora y aprende sobre las emociones haciendo clic o girando la rueda.</p>
+      <p>Entender los propios sentimientos no siempre es sencillo. Esta herramienta está aquí para ayudarte a entender lo que ocurre dentro de ti.</p>
+      <p>Úsala solo o con alguien más para construir un vocabulario emocional más claro y sentirte más seguro al expresarte.</p>
+      <h3 class="info-subheading">Cómo navegar el círculo</h3>
+      <p>El círculo está diseñado en tres anillos, que van de emociones amplias a otras más específicas.</p>
+      <p>A medida que te desplazas hacia afuera, vas acercándote con suavidad a lo que sientes de verdad.</p>
+      <p>También puedes observar cómo algunas emociones están junto a otras, opuestas entre sí, o se mezclan.</p>
+      <p>Los sentimientos no siempre son separados; pueden solaparse, desplazarse y evolucionar.</p>
+    `,
   },
   de: {
     howTab: 'nutzen', howTitle: 'So geht\'s',
-    howItems: [
-      ['Drei Ringe', 'der innere Ring zeigt Kernemotionen, der mittlere spezifischere Gefühle, der äußere nuancierte Variationen'],
-      ['Drehen',     'Kreis klicken und ziehen, um ihn frei zu drehen'],
-      ['Auswählen',  'auf ein Segment klicken, um es auf den Zeiger einzurasten und unten zu benennen'],
-      ['Erkunden',   'auf den markierten Emotions-Namen klicken, um die vollständige Beschreibung zu öffnen'],
-      ['Schließen',  'Escape drücken oder außerhalb des Kreises klicken, um die Auswahl zu löschen'],
-    ],
+    howHTML: `
+      <p>Entdecke Emotionen und lerne mehr über sie, indem du auf das Rad klickst oder es drehst.</p>
+      <p>Gefühle zu verstehen ist nicht immer einfach. Dieses Werkzeug hilft dir, zu begreifen, was in dir vorgeht.</p>
+      <p>Nutze es allein oder gemeinsam mit jemandem, um deinen emotionalen Wortschatz zu erweitern und dich selbst sicherer ausdrücken zu können.</p>
+      <h3 class="info-subheading">Im Kreis navigieren</h3>
+      <p>Der Kreis ist in drei Ringe unterteilt, die von breiten Emotionen zu spezifischeren führen.</p>
+      <p>Je weiter du nach außen gehst, desto feiner grenzt du ein, was sich für dich wahr anfühlt.</p>
+      <p>Du wirst vielleicht auch bemerken, wie Emotionen nebeneinander, gegenüber oder vermischt erscheinen.</p>
+      <p>Gefühle sind nicht immer voneinander getrennt – sie können sich überlappen, verschieben und verändern.</p>
+    `,
   },
   pt: {
     howTab: 'usar', howTitle: 'Como usar',
-    howItems: [
-      ['Três anéis', 'o anel interno mostra emoções centrais, o do meio sentimentos mais específicos, o externo variações matizadas'],
-      ['Girar',      'clique e arraste o círculo para girá-lo livremente'],
-      ['Selecionar', 'clique em qualquer segmento para centrá-lo no ponteiro e nomeá-lo abaixo'],
-      ['Aprender',   'clique no nome da emoção destacada para abrir sua descrição completa'],
-      ['Fechar',     'pressione Escape ou clique fora do círculo para limpar a seleção'],
-    ],
+    howHTML: `
+      <p>Explore e aprenda sobre as emoções clicando ou girando a roda.</p>
+      <p>Entender os próprios sentimentos nem sempre é simples. Esta ferramenta está aqui para ajudá-lo a compreender o que se passa dentro de você.</p>
+      <p>Use-a sozinho ou com outra pessoa para construir um vocabulário emocional mais claro e se expressar com mais confiança.</p>
+      <h3 class="info-subheading">Navegando pelo círculo</h3>
+      <p>O círculo é composto por três anéis, indo de emoções amplas a outras mais específicas.</p>
+      <p>À medida que você se move para fora, vai se aproximando suavemente do que parece verdadeiro para você.</p>
+      <p>Você também pode notar como certas emoções ficam próximas umas das outras, opostas entre si ou se misturam.</p>
+      <p>Os sentimentos nem sempre são separados; eles podem se sobrepor, mudar e evoluir.</p>
+    `,
   },
   nl: {
     howTab: 'gebruik', howTitle: 'Hoe te gebruiken',
-    howItems: [
-      ['Drie ringen', 'de binnenste ring toont kernemotities, de middelste meer specifieke gevoelens, de buitenste genuanceerde variaties'],
-      ['Draaien',     'klik en sleep de cirkel om hem vrij te draaien'],
-      ['Selecteren',  'klik op een segment om het op de aanwijzer te vergrendelen en het hieronder te benoemen'],
-      ['Verkennen',   'klik op de gemarkeerde emotiename om de volledige beschrijving te openen'],
-      ['Sluiten',     'druk op Escape of klik buiten de cirkel om de selectie te wissen'],
-    ],
+    howHTML: `
+      <p>Verken emoties en leer er meer over door op het wiel te klikken of het te draaien.</p>
+      <p>Gevoelens begrijpen is niet altijd vanzelfsprekend. Dit hulpmiddel helpt je te doorgronden wat er van binnen omgaat.</p>
+      <p>Gebruik het alleen of samen met iemand anders om een rijker emotioneel vocabulaire op te bouwen en jezelf zekerder te uiten.</p>
+      <h3 class="info-subheading">Navigeren in de cirkel</h3>
+      <p>De cirkel is opgebouwd uit drie ringen, van brede emoties naar steeds specifiekere.</p>
+      <p>Hoe verder je naar buiten gaat, hoe zachter je inzoomt op wat voor jou klopt.</p>
+      <p>Je kunt ook opmerken hoe emoties naast elkaar liggen, tegenover elkaar staan, of in elkaar overlopen.</p>
+      <p>Gevoelens zijn niet altijd afzonderlijk; ze kunnen overlappen, verschuiven en veranderen.</p>
+    `,
   },
   it: {
     howTab: 'usare', howTitle: 'Come usarlo',
-    howItems: [
-      ['Tre anelli',  'l\'anello interno mostra le emozioni di base, quello centrale sentimenti più specifici, quello esterno variazioni sfumate'],
-      ['Girare',      'fai clic e trascina il cerchio per farlo girare liberamente'],
-      ['Selezionare', 'fai clic su qualsiasi segmento per centrarlo sul cursore e nominarlo in basso'],
-      ['Scoprire',    'fai clic sul nome dell\'emozione evidenziata per aprire la sua descrizione completa'],
-      ['Chiudere',    'premi Escape o fai clic fuori dal cerchio per cancellare la selezione'],
-    ],
+    howHTML: `
+      <p>Esplora le emozioni e impara a conoscerle cliccando o facendo girare la ruota.</p>
+      <p>Capire i propri sentimenti non è sempre immediato. Questo strumento è qui per aiutarti a fare chiarezza su ciò che accade dentro di te.</p>
+      <p>Usalo da solo o con qualcun altro per costruire un vocabolario emotivo più ricco e sentirti più sicuro nell'esprimerti.</p>
+      <h3 class="info-subheading">Come orientarsi nel cerchio</h3>
+      <p>Il cerchio è strutturato in tre anelli, che vanno dalle emozioni più generali a quelle più specifiche.</p>
+      <p>Muovendoti verso l'esterno, ti avvicini delicatamente a ciò che senti davvero.</p>
+      <p>Potresti anche notare come alcune emozioni si trovino vicine, opposte l'una all'altra, o si mescolino tra loro.</p>
+      <p>I sentimenti non sono sempre separati; possono sovrapporsi, spostarsi ed evolversi.</p>
+    `,
   },
   ja: {
     howTab: '使い方', howTitle: '使い方',
-    howItems: [
-      ['3つのリング',  '内側のリングは基本感情、中間はより具体的な感情、外側は細かいバリエーションを示す'],
-      ['回転',         '円盤をクリック＆ドラッグして自由に回す'],
-      ['選択',         'セグメントをクリックして、ポインタに合わせ、下に名前を表示する'],
-      ['学ぶ',         'ハイライトされた感情名をクリックして詳細な説明を開く'],
-      ['閉じる',       'Escキーを押すか、円盤外をクリックして選択を解除する'],
-    ],
+    howHTML: `
+      <p>クリックしたり回したりしながら、感情を探り、理解を深めましょう。</p>
+      <p>自分の気持ちを理解するのは、いつも簡単とは限りません。このツールは、自分の内側で起きていることを整理する助けになります。</p>
+      <p>ひとりで使っても、誰かと一緒に使っても構いません。感情の言葉を増やし、自分をより自信を持って表現できるようになりましょう。</p>
+      <h3 class="info-subheading">円の使い方</h3>
+      <p>円は三つのリングで構成されており、外側に向かうほど、より具体的な感情へと絞り込まれていきます。</p>
+      <p>外へ向かうにつれて、自分にとって本当のことに、そっと近づいていきます。</p>
+      <p>感情どうしが隣り合っていたり、反対側に位置していたり、溶け合っていたりすることにも気づくかもしれません。</p>
+      <p>感情はいつも明確に分かれているわけではなく、重なり合い、移り変わり、変化していくものです。</p>
+    `,
   },
   zh: {
     howTab: '用法', howTitle: '使用方法',
-    howItems: [
-      ['三个环', '内环显示核心情绪，中环显示更具体的感受，外环显示细微变化'],
-      ['旋转',   '点击并拖动圆圈使其自由旋转'],
-      ['选择',   '点击任意扇区，将其对齐到指针并在下方显示名称'],
-      ['了解',   '点击高亮的情绪名称，打开其完整描述'],
-      ['关闭',   '按 Escape 键或点击圆圈外部以清除选择'],
-    ],
+    howHTML: `
+      <p>通过点击或旋转轮盘，探索并了解各种情绪。</p>
+      <p>理解内心的感受并不总是一件容易的事。这个工具能帮助你厘清内心正在发生的事情。</p>
+      <p>你可以独自使用，也可以与他人一起使用，从而建立更清晰的情绪词汇，更自信地表达自己。</p>
+      <h3 class="info-subheading">在圆圈中导航</h3>
+      <p>圆圈由三个环组成，从宽泛的情绪逐渐过渡到更具体的情绪。</p>
+      <p>当你向外移动时，你会温和地缩小范围，找到真正符合你感受的那个词。</p>
+      <p>你也会发现，有些情绪彼此相邻，有些相互对立，有些则融合在一起。</p>
+      <p>感受并不总是泾渭分明的，它们可以相互交叠、流动，并随时间演变。</p>
+    `,
   },
   ar: {
     howTab: 'استخدام', howTitle: 'كيفية الاستخدام',
-    howItems: [
-      ['ثلاث حلقات', 'الحلقة الداخلية تُظهر المشاعر الأساسية، الوسطى مشاعر أكثر تحديداً، والخارجية تنويعات دقيقة'],
-      ['الدوران',     'انقر واسحب الدائرة لتدويرها بحرية'],
-      ['التحديد',     'انقر على أي قطاع لتثبيته عند المؤشر وتسميته أدناه'],
-      ['التعلم',      'انقر على اسم العاطفة المميز لفتح وصفها الكامل'],
-      ['الإغلاق',     'اضغط Escape أو انقر خارج الدائرة لمسح اختيارك'],
-    ],
+    howHTML: `
+      <p>استكشف المشاعر وتعلّم عنها بالنقر على العجلة أو تدويرها.</p>
+      <p>فهم ما نشعر به ليس دائماً أمراً سهلاً. هذه الأداة هنا لتساعدك على استيعاب ما يجري بداخلك.</p>
+      <p>استخدمها بمفردك أو مع شخص آخر، لبناء مفردات عاطفية أوضح والتعبير عن نفسك بثقة أكبر.</p>
+      <h3 class="info-subheading">التنقّل في الدائرة</h3>
+      <p>تتكوّن الدائرة من ثلاث حلقات، تنتقل من المشاعر الواسعة إلى الأكثر تحديداً.</p>
+      <p>كلّما تحرّكت نحو الخارج، اقتربتَ برفق ممّا يبدو صادقاً وحقيقياً بالنسبة لك.</p>
+      <p>قد تلاحظ أيضاً كيف تتجاور بعض المشاعر أو تتعارض أو تمتزج مع بعضها.</p>
+      <p>المشاعر ليست دائماً منفصلة؛ يمكن أن تتداخل وتتحوّل وتتطوّر.</p>
+    `,
   },
   fa: {
     howTab: 'استفاده', howTitle: 'نحوه استفاده',
-    howItems: [
-      ['سه حلقه', 'حلقه داخلی احساسات اصلی، حلقه میانی احساسات خاص‌تر، و حلقه بیرونی تنوعات دقیق‌تر را نشان می‌دهد'],
-      ['چرخش',    'برای چرخاندن آزاد، روی دایره کلیک کنید و بکشید'],
-      ['انتخاب',  'روی هر بخش کلیک کنید تا به نشانگر بچسبد و نامش در پایین نمایش داده شود'],
-      ['یادگیری', 'روی نام برجسته‌شده احساس کلیک کنید تا توضیح کامل آن باز شود'],
-      ['بستن',    'Escape را بفشارید یا خارج از دایره کلیک کنید تا انتخاب پاک شود'],
-    ],
+    howHTML: `
+      <p>با کلیک کردن یا چرخاندن چرخ، احساسات را کشف کنید و درباره‌شان بیاموزید.</p>
+      <p>درک احساسات همیشه ساده نیست. این ابزار اینجاست تا به شما کمک کند بفهمید درونتان چه می‌گذرد.</p>
+      <p>می‌توانید از آن به‌تنهایی یا با دیگری استفاده کنید تا واژگان عاطفی روشن‌تری بسازید و با اطمینان بیشتری خود را بیان کنید.</p>
+      <h3 class="info-subheading">راهیابی در دایره</h3>
+      <p>دایره در سه حلقه طراحی شده، از احساسات کلی به سمت احساسات خاص‌تر.</p>
+      <p>با حرکت به سمت بیرون، آرام‌آرام به آنچه برای شما راست و واقعی‌تر به نظر می‌رسد نزدیک می‌شوید.</p>
+      <p>ممکن است متوجه شوید که چگونه برخی احساسات در کنار هم، در برابر هم، یا درهم‌آمیخته قرار دارند.</p>
+      <p>احساسات همیشه از هم جدا نیستند؛ می‌توانند روی هم بیفتند، جابه‌جا شوند و تغییر کنند.</p>
+    `,
   },
 };
 
 /* ─── INFO OVERLAY TRANSLATIONS ─────────────────────────────────────────── */
 const INFO_DATA = {
   en: {
-    tabs: ['about', 'purpose', 'resources'],
+    tabs: ['about', 'resources'],
+    purposeTitle: 'About',
+    purposeParas: [
+      'These days, many of us find it hard to express our emotions and end up relying on the same few words to express our feelings. Research has pointed out that most adults can only name 12 different emotions. Yet research suggests that humans experience thousands of distinct emotional states.',
+      'The gap between what we feel and what we can express is significant. Bridging this gap can gradually nurture our relationships, strengthen our sense of humanity, and enrich modern civilisation. And in doing so, it can also nourish the mind, heart, spirit, and soul.',
+    ],
+    scienceTitle: 'The Science behind it',
+    scienceParas: [
+      '<strong>Naming changes the brain</strong> — Precisely labelling an emotion (known as affect labelling) measurably reduces activity in the amygdala, the brain’s threat centre. You feel less overwhelmed not because the feeling went away, but because language gives your prefrontal cortex something to work with.',
+      '<strong>Precision enables action</strong> — “I feel bad” is a dead end. “I feel overlooked and quietly resentful” points directly to what needs addressing.',
+      '<strong>Emotional granularity</strong> — The ability to distinguish subtle shades of feeling is linked to better decision-making, stronger relationships, and greater resilience under stress.',
+      '<strong>It compounds over time</strong> — Every time you reach for a more accurate word you build a richer map of your inner life. That map becomes the foundation for genuine self-awareness, authentic communication, and the emotional agility that makes hard things more navigable.',
+    ],
     aboutTitle: 'Why I made this',
     aboutParas: [
-      'A few years ago I realised I couldn\'t answer a simple question my partner asked me: <em>how do you feel?</em>',
-      'I knew there was something, but I couldn\'t express it, words simply wouldn\'t come. "Good" or "bad" were the best I could manage. Little did I know that these aren\'t even emotions! No wonder it would leave my partner puzzled.',
-      'Once I learned more about emotions and emotional maturity I realised that this isn\'t unusual. Most adults only use around a dozen words to describe their inner experience, even though we feel far more than that. But the gap between the feelings we experience and what we can name really matters.',
-      'I didn\'t invent this wheel, it\'s based upon Plutchik\'s model and years of clinical and neuroscientific research. The descriptions are written to help you not just identify a feeling, but recognise it in your body.',
-      'You don\'t have to be in crisis to use it. Curiosity about yourself is enough.',
-      'I hope this helps strengthen your relationships, whether at school, at work, or with your loved ones.',
+      'A few years ago I realised I couldn’t answer a simple question my partner asked me: <em>how do you feel?</em>',
+      'I knew there was something, but I couldn’t express it, words simply wouldn’t come. “Good” or “bad” were the best I could manage. Little did I know that these aren’t even emotions! No wonder my answer would leave my partner puzzled.',
+      'A long journey of self-discovery followed, and over time, I began to understand just how powerful emotional awareness can be. And how much it can shape the way we connect with ourselves and with others.',
+      'I didn’t invent this wheel, it’s based upon Plutchik’s model and years of clinical and neuroscientific research. The descriptions are written to help you not just identify a feeling, but recognise it in your body.',
+      'You don’t have to be in crisis to use it. Curiosity about yourself is enough.',
+      'I hope it helps you feel a little more understood, and helps you understand the people in your life better, too.',
       '— Barth, 2026',
-    ],
-    purposeTitle: 'Why it matters',
-    purposeParas: [
-      'Most people use about a dozen words for how they feel. Research shows we experience thousands of distinct emotional states — and the gap between the two is not trivial.',
-      '<strong>Naming changes the brain.</strong> Precisely labelling an emotion — known as affect labelling — measurably reduces activity in the amygdala, the brain\'s threat centre. You feel less overwhelmed not because the feeling went away, but because language gives your prefrontal cortex something to work with.',
-      '<strong>Precision enables action.</strong> "I feel bad" is a dead end. "I feel overlooked and quietly resentful" points directly to what needs addressing. Emotional granularity — the ability to distinguish subtle shades of feeling — is linked to better decision-making, stronger relationships, and greater resilience under stress.',
-      '<strong>It compounds over time.</strong> Every time you reach for a more accurate word you build a richer map of your inner life. That map becomes the foundation for genuine self-awareness, authentic communication, and the emotional agility that makes hard things more navigable.',
     ],
     moreTitle: 'Resources',
     moreItems: [
-      ['How Emotions Are Made',      'Lisa Feldman Barrett\'s landmark book on the science of emotion and why naming them precisely matters'],
+      ['How Emotions Are Made',      'Lisa Feldman Barrett’s landmark book on the science of emotion and why naming them precisely matters'],
       ['Permission to Feel',         'Marc Brackett (Yale Center for Emotional Intelligence) on RULER, the evidence-based approach to emotional literacy'],
-      ['Emotional Intelligence',     'Daniel Goleman\'s book explains why Emotional Intelligence can matter more than IQ'],
-      ['Atlas of Emotions',          'Paul Ekman\'s interactive map of emotion states, built with the Dalai Lama'],
+      ['Emotional Intelligence',     'Daniel Goleman’s book explains why Emotional Intelligence can matter more than IQ'],
+      ['Atlas of Emotions',          'Paul Ekman’s interactive map of emotion states, built with the Dalai Lama'],
       ['Affect Labelling',           'The original research showing that naming emotions reduces amygdala activation (Lieberman et al., 2007)'],
       ['Emotional Granularity',      'Barrett &amp; colleagues on why distinguishing emotion states matters for wellbeing'],
     ],
   },
   fr: {
-    tabs: ['à propos', 'pourquoi', 'plus'],
+    tabs: ['à propos', 'plus'],
     aboutTitle: 'Pourquoi j\'ai créé ceci',
     aboutParas: [
       'Il y a quelques années, j\'ai réalisé que je ne pouvais pas répondre à une simple question que me posait mon partenaire : <em>comment tu te sens ?</em>',
       'Je savais qu\'il y avait quelque chose, mais je ne pouvais pas l\'exprimer, les mots ne venaient tout simplement pas. « Bien » ou « mal » étaient le mieux que je pouvais dire. Je ne savais même pas que ce ne sont pas des émotions ! Pas étonnant que cela laissait mon partenaire perplexe.',
-      'Après avoir appris davantage sur les émotions et la maturité émotionnelle, j\'ai réalisé que ce n\'est pas inhabituel. La plupart des adultes n\'utilisent qu\'une douzaine de mots environ pour décrire leur expérience intérieure, même si nous ressentons bien plus. Mais l\'écart entre les sentiments que nous éprouvons et ce que nous pouvons nommer compte vraiment.',
+      'Un long chemin de découverte de soi a suivi, et avec le temps, j\'ai commencé à comprendre à quel point la conscience émotionnelle peut être puissante. Et combien elle peut façonner la façon dont nous nous connectons à nous-mêmes et aux autres.',
       'Je n\'ai pas inventé cette roue, elle est basée sur le modèle de Plutchik et des années de recherches cliniques et neuroscientifiques. Les descriptions sont rédigées pour vous aider non seulement à identifier un sentiment, mais à le reconnaître dans votre corps.',
       'Vous n\'avez pas besoin d\'être en crise pour l\'utiliser. La curiosité envers vous-même suffit.',
-      'J\'espère que cela vous aidera à renforcer vos relations, que ce soit à l\'école, au travail ou avec vos proches.',
+      'J\'espère que ça vous aidera à vous sentir un peu mieux compris — et à mieux comprendre les gens qui vous entourent.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Pourquoi c\'est important',
     purposeParas: [
-      'La plupart des gens n\'utilisent qu\'une dizaine de mots pour décrire ce qu\'ils ressentent. La recherche montre que nous vivons des milliers d\'états émotionnels distincts — et l\'écart entre les deux n\'est pas anodin.',
+      'De nos jours, beaucoup d\'entre nous peinent à exprimer leurs émotions et finissent par revenir toujours aux mêmes mots. Des recherches ont montré que la plupart des adultes ne savent nommer que 12 émotions différentes.',
+      'L\'écart entre ce que nous ressentons et ce que nous pouvons exprimer est considérable. Le combler peut, peu à peu, nourrir nos relations, renforcer notre sens de l\'humanité et enrichir la civilisation moderne. Ce faisant, il peut aussi nourrir l\'esprit, le cœur, l\'âme et l\'être.',
+    ],
+    scienceTitle: 'La science derrière tout ça',
+    scienceParas: [
       '<strong>Nommer change le cerveau.</strong> Étiqueter précisément une émotion — ce qu\'on appelle l\'étiquetage affectif — réduit de manière mesurable l\'activité de l\'amygdale, le centre des menaces du cerveau. Vous vous sentez moins submergé non pas parce que le sentiment a disparu, mais parce que le langage donne à votre cortex préfrontal quelque chose sur quoi travailler.',
       '<strong>La précision permet l\'action.</strong> « Je me sens mal » est une impasse. « Je me sens négligé et discrètement rancunier » indique directement ce qu\'il faut traiter. La granularité émotionnelle — la capacité à distinguer de subtiles nuances de sentiment — est liée à de meilleures décisions, à des relations plus solides et à une plus grande résilience face au stress.',
       '<strong>Cela se cumule avec le temps.</strong> Chaque fois que vous cherchez un mot plus précis, vous construisez une carte plus riche de votre vie intérieure. Cette carte devient la base d\'une véritable conscience de soi, d\'une communication authentique et de l\'agilité émotionnelle qui rend les choses difficiles plus navigables.',
@@ -3989,20 +3996,24 @@ const INFO_DATA = {
     ],
   },
   es: {
-    tabs: ['acerca', 'por qué', 'más'],
+    tabs: ['acerca', 'más'],
     aboutTitle: 'Por qué lo hice',
     aboutParas: [
       'Hace unos años me di cuenta de que no podía responder a una simple pregunta que me hacía mi pareja: <em>¿cómo te sientes?</em>',
       'Sabía que había algo, pero no podía expresarlo, las palabras simplemente no venían. «Bien» o «mal» era lo mejor que podía decir. ¡Ni siquiera sabía que estas no son emociones! Con razón eso dejaba a mi pareja desconcertada.',
-      'Una vez que aprendí más sobre las emociones y la madurez emocional, me di cuenta de que esto no es inusual. La mayoría de los adultos solo usa alrededor de una docena de palabras para describir su experiencia interior, aunque sentimos mucho más. Pero la brecha entre los sentimientos que experimentamos y lo que podemos nombrar realmente importa.',
+      'Siguió un largo camino de autodescubrimiento y, con el tiempo, empecé a entender lo poderosa que puede ser la conciencia emocional. Y cuánto puede moldear la forma en que nos conectamos con nosotros mismos y con los demás.',
       'No inventé esta rueda, está basada en el modelo de Plutchik y años de investigación clínica y neurocientífica. Las descripciones están escritas para ayudarte no solo a identificar un sentimiento, sino a reconocerlo en tu cuerpo.',
       'No tienes que estar en crisis para usarla. La curiosidad sobre ti mismo es suficiente.',
-      'Espero que esto ayude a fortalecer tus relaciones, ya sea en la escuela, en el trabajo o con tus seres queridos.',
+      'Espero que te ayude a sentirte un poco más comprendido, y a comprender mejor también a las personas que forman parte de tu vida.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Por qué importa',
     purposeParas: [
-      'La mayoría de las personas usa unas doce palabras para describir cómo se siente. La investigación muestra que experimentamos miles de estados emocionales distintos — y la brecha entre ambos no es trivial.',
+      'Hoy en día, a muchos de nosotros nos cuesta expresar nuestras emociones y acabamos recurriendo a las mismas pocas palabras para describir lo que sentimos. Las investigaciones señalan que la mayoría de los adultos solo son capaces de nombrar 12 emociones distintas.',
+      'La brecha entre lo que sentimos y lo que podemos expresar es enorme. Salvarla puede nutrir gradualmente nuestras relaciones, fortalecer nuestro sentido de humanidad y enriquecer la civilización moderna. Y al hacerlo, también puede alimentar la mente, el corazón, el espíritu y el alma.',
+    ],
+    scienceTitle: 'La ciencia que hay detrás',
+    scienceParas: [
       '<strong>Nombrar cambia el cerebro.</strong> Etiquetar con precisión una emoción — conocido como etiquetado afectivo — reduce de forma medible la actividad de la amígdala, el centro de amenazas del cerebro. Te sientes menos abrumado no porque el sentimiento haya desaparecido, sino porque el lenguaje le da a tu corteza prefrontal algo con qué trabajar.',
       '<strong>La precisión impulsa la acción.</strong> «Me siento mal» es un callejón sin salida. «Me siento ignorado y calladamente resentido» apunta directamente a lo que necesita atención. La granularidad emocional — la capacidad de distinguir matices sutiles del sentimiento — está vinculada a mejores decisiones, relaciones más sólidas y mayor resiliencia ante el estrés.',
       '<strong>Se acumula con el tiempo.</strong> Cada vez que buscas una palabra más precisa, construyes un mapa más rico de tu vida interior. Ese mapa se convierte en la base de la verdadera autoconciencia, la comunicación auténtica y la agilidad emocional que hace más navegables las cosas difíciles.',
@@ -4018,20 +4029,24 @@ const INFO_DATA = {
     ],
   },
   de: {
-    tabs: ['über', 'warum', 'mehr'],
+    tabs: ['über', 'mehr'],
     aboutTitle: 'Warum ich das gemacht habe',
     aboutParas: [
       'Vor einigen Jahren merkte ich, dass ich eine einfache Frage meines Partners nicht beantworten konnte: <em>Wie fühlst du dich?</em>',
       'Ich wusste, dass da etwas war, aber ich konnte es nicht ausdrücken, die Worte wollten einfach nicht kommen. „Gut" oder „schlecht" war das Beste, was ich sagen konnte. Mir war nicht einmal bewusst, dass das gar keine Emotionen sind! Kein Wunder, dass mein Partner ratlos war.',
-      'Als ich mehr über Emotionen und emotionale Reife lernte, erkannte ich, dass das nicht ungewöhnlich ist. Die meisten Erwachsenen verwenden nur etwa ein Dutzend Wörter, um ihr inneres Erleben zu beschreiben, obwohl wir viel mehr fühlen. Doch die Lücke zwischen den Gefühlen, die wir erleben, und dem, was wir benennen können, ist wirklich bedeutsam.',
+      'Es folgte ein langer Weg der Selbstentdeckung, und mit der Zeit begann ich zu verstehen, wie kraftvoll emotionales Bewusstsein sein kann. Und wie sehr es die Art beeinflusst, wie wir uns mit uns selbst und mit anderen verbinden.',
       'Ich habe dieses Rad nicht erfunden, es basiert auf Plutchiks Modell und Jahren klinischer und neurowissenschaftlicher Forschung. Die Beschreibungen sind so verfasst, dass sie Ihnen helfen, ein Gefühl nicht nur zu identifizieren, sondern es auch in Ihrem Körper zu spüren.',
       'Sie müssen nicht in einer Krise sein, um es zu nutzen. Neugier auf sich selbst reicht aus.',
-      'Ich hoffe, dass dies Ihre Beziehungen stärkt, sei es in der Schule, bei der Arbeit oder mit Ihren Liebsten.',
+      'Ich hoffe, es hilft dir, dich ein bisschen besser verstanden zu fühlen – und die Menschen in deinem Leben besser zu verstehen.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Warum es wichtig ist',
     purposeParas: [
-      'Die meisten Menschen verwenden nur etwa ein Dutzend Wörter, um zu beschreiben, wie sie sich fühlen. Forschungen zeigen, dass wir Tausende verschiedener emotionaler Zustände erleben — und die Kluft zwischen beiden ist nicht trivial.',
+      'Heutzutage fällt es vielen von uns schwer, unsere Emotionen auszudrücken – wir greifen immer wieder auf dieselben wenigen Worte zurück. Forschungen haben gezeigt, dass die meisten Erwachsenen nur 12 verschiedene Gefühle benennen können.',
+      'Die Kluft zwischen dem, was wir fühlen, und dem, was wir ausdrücken können, ist beträchtlich. Sie zu überbrücken kann nach und nach unsere Beziehungen stärken, unser Gefühl von Menschlichkeit vertiefen und die moderne Zivilisation bereichern. Und dabei kann es auch Geist, Herz, Seele und Gemüt nähren.',
+    ],
+    scienceTitle: 'Die Wissenschaft dahinter',
+    scienceParas: [
       '<strong>Benennen verändert das Gehirn.</strong> Das präzise Benennen einer Emotion — bekannt als affektives Labeling — reduziert messbar die Aktivität der Amygdala, dem Bedrohungszentrum des Gehirns. Du fühlst dich weniger überwältigt, nicht weil das Gefühl verschwunden ist, sondern weil die Sprache deinem präfrontalen Kortex etwas gibt, womit er arbeiten kann.',
       '<strong>Präzision ermöglicht Handeln.</strong> „Ich fühle mich schlecht" ist eine Sackgasse. „Ich fühle mich übersehen und still verbittert" zeigt direkt, was angesprochen werden muss. Emotionale Granularität — die Fähigkeit, subtile Schattierungen von Gefühlen zu unterscheiden — ist mit besseren Entscheidungen, stärkeren Beziehungen und größerer Belastbarkeit unter Stress verbunden.',
       '<strong>Es setzt sich mit der Zeit zusammen.</strong> Jedes Mal, wenn du nach einem genaueren Wort greifst, baust du eine reichhaltigere Karte deines inneren Lebens auf. Diese Karte wird zur Grundlage echter Selbsterkenntnis, authentischer Kommunikation und der emotionalen Agilität, die schwierige Dinge leichter navigierbar macht.',
@@ -4047,20 +4062,24 @@ const INFO_DATA = {
     ],
   },
   pt: {
-    tabs: ['sobre', 'porquê', 'mais'],
+    tabs: ['sobre', 'mais'],
     aboutTitle: 'Por que criei isto',
     aboutParas: [
       'Há alguns anos percebi que não conseguia responder a uma pergunta simples que meu parceiro me fazia: <em>como você se sente?</em>',
       'Eu sabia que havia algo, mas não conseguia expressar, as palavras simplesmente não vinham. «Bem» ou «mal» era o melhor que eu conseguia. Mal sabia que nem sequer são emoções! Não é à toa que isso deixava meu parceiro confuso.',
-      'Depois de aprender mais sobre emoções e maturidade emocional, percebi que isso não é incomum. A maioria dos adultos usa apenas cerca de uma dúzia de palavras para descrever sua experiência interior, mesmo que sintamos muito mais. Mas a lacuna entre os sentimentos que experienciamos e o que podemos nomear realmente importa.',
+      'Seguiu-se uma longa jornada de autodescoberta e, com o tempo, comecei a entender o quanto a consciência emocional pode ser poderosa. E o quanto ela pode moldar a forma como nos conectamos com nós mesmos e com os outros.',
       'Não inventei esta roda, é baseada no modelo de Plutchik e em anos de pesquisa clínica e neurocientífica. As descrições são escritas para ajudá-lo não apenas a identificar um sentimento, mas a reconhecê-lo no seu corpo.',
       'Você não precisa estar em crise para usá-la. A curiosidade sobre si mesmo é suficiente.',
-      'Espero que isso ajude a fortalecer seus relacionamentos, seja na escola, no trabalho ou com seus entes queridos.',
+      'Espero que isso ajude você a se sentir um pouco mais compreendido — e a compreender melhor as pessoas que fazem parte da sua vida.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Por que importa',
     purposeParas: [
-      'A maioria das pessoas usa cerca de uma dúzia de palavras para descrever como se sente. Pesquisas mostram que vivenciamos milhares de estados emocionais distintos — e a lacuna entre os dois não é trivial.',
+      'Hoje em dia, muitos de nós têm dificuldade em expressar as próprias emoções e acabamos recorrendo sempre às mesmas poucas palavras. Pesquisas apontam que a maioria dos adultos consegue nomear apenas 12 emoções diferentes.',
+      'A distância entre o que sentimos e o que conseguimos expressar é significativa. Reduzir essa distância pode, gradualmente, nutrir nossos relacionamentos, fortalecer nosso senso de humanidade e enriquecer a civilização moderna. E ao fazer isso, também pode alimentar a mente, o coração, o espírito e a alma.',
+    ],
+    scienceTitle: 'A ciência por trás disso',
+    scienceParas: [
       '<strong>Nomear muda o cérebro.</strong> Rotular com precisão uma emoção — conhecido como rotulagem afetiva — reduz de forma mensurável a atividade da amígdala, o centro de ameaças do cérebro. Você se sente menos sobrecarregado não porque o sentimento desapareceu, mas porque a linguagem dá ao seu córtex pré-frontal algo com que trabalhar.',
       '<strong>A precisão permite a ação.</strong> «Eu me sinto mal» é um beco sem saída. «Eu me sinto ignorado e silenciosamente ressentido» aponta diretamente para o que precisa ser abordado. A granularidade emocional — a capacidade de distinguir sutis matizes de sentimento — está ligada a melhores tomadas de decisão, relacionamentos mais fortes e maior resiliência sob estresse.',
       '<strong>Acumula-se com o tempo.</strong> Cada vez que você busca uma palavra mais precisa, constrói um mapa mais rico de sua vida interior. Esse mapa torna-se a base da genuína autoconsciência, da comunicação autêntica e da agilidade emocional que torna as coisas difíceis mais navegáveis.',
@@ -4076,20 +4095,24 @@ const INFO_DATA = {
     ],
   },
   nl: {
-    tabs: ['over', 'waarom', 'meer'],
+    tabs: ['over', 'meer'],
     aboutTitle: 'Waarom ik dit maakte',
     aboutParas: [
       'Een paar jaar geleden realiseerde ik me dat ik een eenvoudige vraag van mijn partner niet kon beantwoorden: <em>hoe voel jij je?</em>',
       'Ik wist dat er iets was, maar ik kon het niet uitdrukken, de woorden kwamen gewoon niet. «Goed» of «slecht» was het beste wat ik kon zeggen. Ik wist niet eens dat dit helemaal geen emoties zijn! Geen wonder dat mijn partner er verbaasd van was.',
-      'Toen ik meer leerde over emoties en emotionele volwassenheid, besefte ik dat dit niet ongewoon is. De meeste volwassenen gebruiken slechts een tiental woorden om hun innerlijke ervaring te beschrijven, ook al voelen we veel meer. Maar de kloof tussen de gevoelens die we ervaren en wat we kunnen benoemen is echt belangrijk.',
+      'Een lang proces van zelfontdekking volgde, en gaandeweg begon ik te begrijpen hoe krachtig emotioneel bewustzijn kan zijn. En hoeveel het kan bepalen hoe we ons verbinden met onszelf en met anderen.',
       'Ik heb dit wiel niet uitgevonden, het is gebaseerd op het model van Plutchik en jaren van klinisch en neurowetenschappelijk onderzoek. De beschrijvingen zijn geschreven om je te helpen niet alleen een gevoel te identificeren, maar het ook in je lichaam te herkennen.',
       'Je hoeft niet in een crisis te zitten om het te gebruiken. Nieuwsgierigheid naar jezelf is genoeg.',
-      'Ik hoop dat dit helpt je relaties te versterken, of het nu op school, op het werk of met je dierbaren is.',
+      'Ik hoop dat het je helpt je een beetje meer begrepen te voelen — en de mensen in je leven beter te begrijpen.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Waarom het belangrijk is',
     purposeParas: [
-      'De meeste mensen gebruiken ongeveer een dozijn woorden om te beschrijven hoe ze zich voelen. Onderzoek toont aan dat we duizenden afzonderlijke emotionele staten ervaren — en de kloof tussen beide is niet triviaal.',
+      'Tegenwoordig vinden velen van ons het moeilijk om onze emoties te uiten en vallen we telkens terug op dezelfde paar woorden. Onderzoek heeft aangetoond dat de meeste volwassenen slechts 12 verschillende emoties kunnen benoemen.',
+      'De kloof tussen wat we voelen en wat we kunnen uitdrukken is groot. Die kloof overbruggen kan geleidelijk onze relaties voeden, ons gevoel van menselijkheid versterken en de moderne beschaving verrijken. En tegelijkertijd kan het ook geest, hart, ziel en gemoed voeden.',
+    ],
+    scienceTitle: 'De wetenschap erachter',
+    scienceParas: [
       '<strong>Benoemen verandert het brein.</strong> Het nauwkeurig benoemen van een emotie — bekend als affect labelling — vermindert meetbaar de activiteit in de amygdala, het dreigingscentrum van het brein. Je voelt je minder overweldigd, niet omdat het gevoel verdwenen is, maar omdat taal je prefrontale cortex iets geeft om mee te werken.',
       '<strong>Precisie maakt handelen mogelijk.</strong> «Ik voel me slecht» is een doodlopende weg. «Ik voel me over het hoofd gezien en stilzwijgend ressentimentvol» wijst direct naar wat aangepakt moet worden. Emotionele granulariteit — het vermogen om subtiele tinten van gevoel te onderscheiden — is verbonden met betere besluitvorming, sterkere relaties en grotere veerkracht onder stress.',
       '<strong>Het cumuleert in de loop van de tijd.</strong> Elke keer dat je naar een nauwkeuriger woord grijpt, bouw je een rijkere kaart van je innerlijke leven. Die kaart wordt de basis van echte zelfkennis, authentieke communicatie en de emotionele wendbaarheid die moeilijke dingen beter navigeerbaar maakt.',
@@ -4105,20 +4128,24 @@ const INFO_DATA = {
     ],
   },
   it: {
-    tabs: ['info', 'perché', 'altro'],
+    tabs: ['info', 'altro'],
     aboutTitle: 'Perché l\'ho fatto',
     aboutParas: [
       'Qualche anno fa mi sono reso conto che non riuscivo a rispondere a una semplice domanda del mio partner: <em>come ti senti?</em>',
       'Sapevo che c\'era qualcosa, ma non riuscivo a esprimerlo, le parole semplicemente non venivano. «Bene» o «male» era il meglio che potevo dire. Non sapevo nemmeno che queste non sono nemmeno emozioni! Non c\'è da stupirsi che lasciasse il mio partner perplesso.',
-      'Una volta che ho imparato di più sulle emozioni e sulla maturità emotiva, ho capito che questo non è insolito. La maggior parte degli adulti utilizza solo una dozzina di parole per descrivere la propria esperienza interiore, anche se proviamo molto di più. Ma il divario tra i sentimenti che sperimentiamo e ciò che possiamo nominare conta davvero.',
+      'Seguì un lungo percorso di scoperta di sé e, col tempo, cominciai a capire quanto possa essere potente la consapevolezza emotiva. E quanto possa influenzare il modo in cui ci connettiamo con noi stessi e con gli altri.',
       'Non ho inventato questa ruota, è basata sul modello di Plutchik e anni di ricerche cliniche e neuroscientifiche. Le descrizioni sono scritte per aiutarti non solo a identificare un sentimento, ma a riconoscerlo nel tuo corpo.',
       'Non devi essere in crisi per usarla. La curiosità verso te stesso è sufficiente.',
-      'Spero che questo aiuti a rafforzare le tue relazioni, che si tratti della scuola, del lavoro o dei tuoi cari.',
+      'Spero che ti aiuti a sentirti un po\' più capito — e a capire meglio le persone nella tua vita.',
       '— Barth, 2026',
     ],
     purposeTitle: 'Perché è importante',
     purposeParas: [
-      'La maggior parte delle persone usa circa una dozzina di parole per descrivere come si sente. La ricerca mostra che sperimentiamo migliaia di stati emotivi distinti — e il divario tra i due non è banale.',
+      'Oggigiorno, molti di noi faticano a esprimere le proprie emozioni e finiscono per affidarsi sempre alle stesse poche parole. Le ricerche indicano che la maggior parte degli adulti riesce a nominare solo 12 emozioni diverse.',
+      'Il divario tra ciò che proviamo e ciò che riusciamo a esprimere è significativo. Colmarlo può, gradualmente, nutrire le nostre relazioni, rafforzare il nostro senso di umanità e arricchire la civiltà moderna. E così facendo, può anche nutrire la mente, il cuore, lo spirito e l\'anima.',
+    ],
+    scienceTitle: 'La scienza dietro tutto questo',
+    scienceParas: [
       '<strong>Nominare cambia il cervello.</strong> Etichettare con precisione un\'emozione — noto come affect labelling — riduce in modo misurabile l\'attività nell\'amigdala, il centro delle minacce del cervello. Ti senti meno sopraffatto non perché il sentimento sia scomparso, ma perché il linguaggio dà alla tua corteccia prefrontale qualcosa su cui lavorare.',
       '<strong>La precisione consente l\'azione.</strong> «Mi sento male» è un vicolo cieco. «Mi sento trascurato e silenziosamente risentito» indica direttamente ciò che deve essere affrontato. La granularità emotiva — la capacità di distinguere sottili sfumature di sentimento — è collegata a decisioni migliori, relazioni più solide e maggiore resilienza sotto stress.',
       '<strong>Si accumula nel tempo.</strong> Ogni volta che cerchi una parola più precisa, costruisci una mappa più ricca della tua vita interiore. Quella mappa diventa la base della genuina consapevolezza di sé, della comunicazione autentica e dell\'agilità emotiva che rende le cose difficili più navigabili.',
@@ -4134,20 +4161,24 @@ const INFO_DATA = {
     ],
   },
   ja: {
-    tabs: ['概要', '理由', 'もっと'],
+    tabs: ['概要', 'もっと'],
     aboutTitle: 'なぜこれを作ったか',
     aboutParas: [
       '数年前、パートナーから尋ねられた簡単な質問に答えられないことに気づきました。<em>「今どんな気持ち？」</em>',
       '何かがあることはわかっていましたが、うまく言葉にできませんでした。「良い」「悪い」と言うのが精一杯でした。それすら感情ではないことも知らずに。パートナーが戸惑うのも無理はありませんでした。',
-      '感情と感情的な成熟について学ぶうちに、これは珍しいことではないと気づきました。ほとんどの大人は、内面の体験を表現するのに十数個の言葉しか使っていません。でも、私たちが感じていることと言葉にできることの間にあるギャップは、本当に重要です。',
+      'それは長い自己発見の旅の始まりでした。そして時間をかけて、感情への気づきがいかに力強いものかを理解し始めました。そしてそれが、自分自身や他者とのつながり方をどれほど形作るかも。',
       'この感情の輪は私が発明したわけではありません。プルチックのモデルと、長年にわたる臨床・神経科学的研究に基づいています。説明文は、感情を識別するだけでなく、体の中でそれを感じ取る助けとなるように書かれています。',
       '危機的な状況でなくても使えます。自分自身への好奇心があれば十分です。',
-      'これが、学校や職場、あるいは大切な人との関係を深める助けになれば嬉しいです。',
+      'これがあなたを少し「わかってもらえた」と感じる助けになり、大切な人たちのことをもっと深く理解する手助けになれば嬉しいです。',
       '— Barth, 2026',
     ],
     purposeTitle: 'なぜ重要か',
     purposeParas: [
-      'ほとんどの人は自分の気持ちを表すのに約12語しか使いません。研究によると、私たちは何千もの異なる感情状態を経験していますが、その差は些細なことではありません。',
+      '今の時代、自分の感情をうまく表現するのが難しいと感じる人は多く、気づけばいつも同じ言葉で気持ちを伝えようとしています。研究では、ほとんどの大人が表現できる感情は12種類ほどに限られると指摘されています。',
+      '感じていることと言葉にできることの間には、大きなギャップがあります。そのギャップを埋めることで、人間関係が少しずつ豊かになり、人としての感覚が深まり、現代の文明がより豊かになっていきます。そしてその過程で、心・精神・魂が満たされていくこともあるでしょう。',
+    ],
+    scienceTitle: 'その背後にある科学',
+    scienceParas: [
       '<strong>名前をつけることで脳が変わる。</strong> 感情を正確にラベリングする「アフェクト・ラベリング」は、脳の脅威センターである扁桃体の活動を測定可能な形で低下させます。感情が消えるのではなく、言語が前頭前皮質に処理の手がかりを与えるため、感情を扱いやすくなるのです。',
       '<strong>精度が行動を可能にする。</strong> 「気分が悪い」は行き詰まりです。「見過ごされて、静かに憤りを感じている」は、何に対処すべきかを直接示します。感情の粒度、つまり微妙な感情の違いを区別する能力は、より良い意思決定、強い人間関係、ストレス下での高い回復力と結びついています。',
       '<strong>時間とともに積み重なる。</strong> より正確な言葉を探すたびに、内面の豊かな地図が描かれていきます。その地図は、真の自己認識、真の対話、困難なことをより乗り越えやすくする感情的な俊敏さの土台となります。',
@@ -4163,20 +4194,24 @@ const INFO_DATA = {
     ],
   },
   zh: {
-    tabs: ['关于', '为何', '更多'],
+    tabs: ['关于', '更多'],
     aboutTitle: '我为何制作这个',
     aboutParas: [
       '几年前，我发现自己无法回答伴侣问我的一个简单问题：<em>你有什么感受？</em>',
       '我知道心里有些东西，却无法表达，话语就是说不出口。"好"或"不好"已经是我能给出的最好答案了。我甚至不知道，这些根本算不上情绪！难怪我的伴侣总是感到困惑。',
-      '当我更多地了解情绪和情感成熟度后，我意识到这并不罕见。大多数成年人只用大约十几个词来描述自己的内心体验，尽管我们感受到的远不止这些。但我们体验到的感受与我们能够命名的之间的差距，真的很重要。',
+      '一段漫长的自我探索之旅随之展开。渐渐地，我开始明白情感意识究竟有多大的力量。以及它如何深刻地影响着我们与自己、与他人之间的连接方式。',
       '这个情感之轮不是我发明的，它基于普拉奇克的情绪模型以及多年的临床和神经科学研究。这些描述的撰写，不仅是为了帮助你识别某种感受，也是为了让你在身体中感知它。',
       '使用它不需要处于危机之中。对自己保持好奇心就足够了。',
-      '希望这能帮助你加强各种关系，无论是在学校、工作中，还是与你的爱人之间。',
+      '希望它能让你感到更被理解，也能帮助你更好地理解生命中重要的人。',
       '— Barth, 2026',
     ],
     purposeTitle: '为何重要',
     purposeParas: [
-      '大多数人只用约十几个词来描述自己的感受。研究表明，我们经历着数千种不同的情绪状态，而两者之间的差距绝非微不足道。',
+      '如今，我们中的许多人都很难表达自己的情绪，往往只能反复借助那几个有限的词语来描述感受。研究指出，大多数成年人能说出的情绪词汇不超过12种。',
+      '我们所感受到的与我们能够表达的之间，存在着显著的落差。弥合这一落差，能够逐渐滋养我们的关系，增强我们对人性的感知，并丰富现代文明。在此过程中，它也能滋养我们的思想、心灵、精神与灵魂。',
+    ],
+    scienceTitle: '背后的科学',
+    scienceParas: [
       '<strong>命名改变大脑。</strong> 精确标注一种情绪（即情感标注）可显著降低大脑威胁中枢——杏仁核的活动。你感到不那么不知所措，不是因为情绪消失了，而是因为语言给了你的前额皮层一个处理的起点。',
       '<strong>精准推动行动。</strong> "我感觉很糟糕"是个死胡同。"我感到被忽视，心中积压着隐隐的怨恨"则直接指向需要解决的问题。情绪粒度——区分微妙感受差异的能力——与更好的决策、更强的关系和更高的抗压能力密切相关。',
       '<strong>随时间复利积累。</strong> 每一次你去寻找更准确的词语，都在为自己的内心生活绘制更丰富的地图。这张地图成为真正自我认知、真诚沟通和情绪敏捷性的基础，让艰难的事情变得更易应对。',
@@ -4192,20 +4227,24 @@ const INFO_DATA = {
     ],
   },
   ar: {
-    tabs: ['عن', 'لماذا', 'المزيد'],
+    tabs: ['عن', 'المزيد'],
     aboutTitle: 'لماذا صنعت هذا',
     aboutParas: [
       'قبل بضع سنوات، أدركت أنني لا أستطيع الإجابة على سؤال بسيط طرحه عليّ شريكي: <em>كيف تشعر؟</em>',
       'كنت أعلم أن ثمة شيئاً ما، لكنني لم أستطع التعبير عنه، إذ لم تأتِ الكلمات ببساطة. كان «بخير» أو «بشكل سيء» أفضل ما يمكنني قوله. لم أكن أعلم أن هذه ليست حتى مشاعر! لا عجب أن ذلك كان يحيّر شريكي.',
-      'بعد أن تعلمت المزيد عن المشاعر والنضج العاطفي، أدركت أن هذا ليس أمراً غير معتاد. يستخدم معظم البالغين نحو اثنتي عشرة كلمة فقط لوصف تجربتهم الداخلية، رغم أننا نشعر بما هو أكثر من ذلك بكثير. غير أن الفجوة بين المشاعر التي نختبرها وما يمكننا تسميته مهمة حقاً.',
+      'تبع ذلك رحلة طويلة من اكتشاف الذات، ومع الوقت، بدأت أدرك مدى قوة الوعي العاطفي. وكم يمكنه أن يُشكّل الطريقة التي نتواصل بها مع أنفسنا ومع الآخرين.',
       'لم أخترع هذه العجلة، بل إنها مبنية على نموذج بلوتشيك وسنوات من الأبحاث السريرية وعلوم الأعصاب. كُتبت الأوصاف لمساعدتك ليس فقط على تحديد مشاعرك، بل على التعرف عليها في جسمك.',
       'لست مضطراً إلى أن تكون في أزمة لاستخدامها. الفضول تجاه نفسك كافٍ.',
-      'آمل أن يساعدك هذا على تعزيز علاقاتك، سواء في المدرسة أو في العمل أو مع أحبائك.',
+      'آمل أن يساعدك على الشعور بأنك مفهوم أكثر قليلاً — وأن يساعدك على فهم من تحبّهم في حياتك بصورة أعمق.',
       '— Barth, 2026',
     ],
     purposeTitle: 'لماذا يهم هذا',
     purposeParas: [
-      'يستخدم معظم الناس نحو اثنتي عشرة كلمة فحسب للتعبير عما يشعرون به. تُظهر الأبحاث أننا نختبر آلاف الحالات العاطفية المتميزة، والفجوة بين الاثنين ليست بسيطة.',
+      'في أيامنا هذه، يجد كثيرٌ منّا صعوبةً في التعبير عن مشاعره، فنلجأ في نهاية المطاف إلى نفس الكلمات القليلة للتعبير عمّا نشعر به. وقد أشارت الأبحاث إلى أن معظم البالغين لا يستطيعون تسمية أكثر من 12 عاطفة مختلفة.',
+      'الفجوة بين ما نشعر به وما نستطيع التعبير عنه كبيرة وعميقة. سدّها يمكن أن يُغذّي علاقاتنا تدريجياً، ويُعزّز إحساسنا بالإنسانية، ويُثري الحضارة المعاصرة. وفي هذا كلّه، ثمة ما يُغذّي العقل والقلب والروح والوجدان.',
+    ],
+    scienceTitle: 'العلم وراء ذلك',
+    scienceParas: [
       '<strong>التسمية تغيّر الدماغ.</strong> إن تسمية عاطفة بدقة، وهو ما يُعرف بالتصنيف العاطفي، يُقلل بشكل قابل للقياس من نشاط اللوزة الدماغية، مركز التهديد في الدماغ. تشعر بقدر أقل من الإرهاق ليس لأن الشعور اختفى، بل لأن اللغة تمنح قشرتك الأمامية شيئاً تعمل عليه.',
       '<strong>الدقة تُتيح العمل.</strong> «أشعر بالسوء» هو طريق مسدود. «أشعر أنني مغفل عنه وأحمل استياءً خفياً» يشير مباشرة إلى ما يحتاج إلى معالجة. الحبيبية العاطفية، أي القدرة على تمييز الدرجات الدقيقة من المشاعر، مرتبطة باتخاذ قرارات أفضل وعلاقات أقوى وصمود أكبر في مواجهة الضغط.',
       '<strong>تتراكم مع مرور الوقت.</strong> في كل مرة تبحث فيها عن كلمة أكثر دقة، تبني خريطة أغنى لحياتك الداخلية. تلك الخريطة تصبح أساساً للوعي الذاتي الحقيقي والتواصل الأصيل والرشاقة العاطفية التي تجعل الأمور الصعبة أكثر قابلية للتعامل.',
@@ -4221,20 +4260,24 @@ const INFO_DATA = {
     ],
   },
   fa: {
-    tabs: ['درباره', 'چرا', 'بیشتر'],
+    tabs: ['درباره', 'بیشتر'],
     aboutTitle: 'چرا این را ساختم',
     aboutParas: [
       'چند سال پیش متوجه شدم که نمی‌توانم به یک سؤال ساده شریکم پاسخ دهم: <em>چه احساسی داری؟</em>',
       'می‌دانستم چیزی هست، اما نمی‌توانستم آن را بیان کنم، کلمات به سادگی نمی‌آمدند. «خوب» یا «بد» بهترین چیزی بود که می‌توانستم بگویم. حتی نمی‌دانستم که اینها اصلاً احساس نیستند! جای تعجب نیست که شریکم سردرگم می‌شد.',
-      'وقتی بیشتر درباره احساسات و بلوغ عاطفی یاد گرفتم، فهمیدم که این امر غیرمعمول نیست. بیشتر بزرگسالان تنها حدود یک دوجین کلمه برای توصیف تجربه درونی خود استفاده می‌کنند، حتی اگر بسیار بیشتر احساس می‌کنیم. اما شکاف بین احساساتی که تجربه می‌کنیم و آنچه می‌توانیم نام ببریم واقعاً مهم است.',
+      'سفر طولانی کشف خود آغاز شد و به مرور زمان، شروع کردم به درک اینکه آگاهی عاطفی چقدر می‌تواند قدرتمند باشد. و اینکه چقدر می‌تواند شکل‌دهنده‌ی ارتباط ما با خودمان و با دیگران باشد.',
       'من این چرخ را اختراع نکردم، بر اساس مدل پلوتچیک و سال‌ها تحقیقات بالینی و علوم اعصاب است. توضیحات برای کمک به شما نوشته شده‌اند تا نه فقط یک احساس را شناسایی کنید، بلکه آن را در بدنتان بشناسید.',
       'برای استفاده از آن نیازی نیست در بحران باشید. کنجکاوی درباره خودتان کافی است.',
-      'امیدوارم این به تقویت روابطتان کمک کند، چه در مدرسه، چه در کار، یا با عزیزانتان.',
+      'امیدوارم این ابزار به شما کمک کند کمی بیشتر احساس کنید که فهمیده می‌شوید — و افراد مهم زندگی‌تان را نیز بهتر بشناسید.',
       '— Barth, 2026',
     ],
     purposeTitle: 'چرا اهمیت دارد',
     purposeParas: [
-      'بیشتر مردم تنها از حدود دوازده کلمه برای توصیف احساساتشان استفاده می‌کنند. تحقیقات نشان می‌دهد ما هزاران حالت عاطفی متمایز را تجربه می‌کنیم، و شکاف میان این دو اصلاً بی‌اهمیت نیست.',
+      'امروزه، بسیاری از ما در بیان احساساتمان دچار مشکل می‌شویم و در نهایت برای توصیف آنچه احساس می‌کنیم به همان چند کلمه تکراری پناه می‌بریم. پژوهش‌ها نشان داده‌اند که بیشتر بزرگسالان تنها می‌توانند ۱۲ احساس متفاوت را نام ببرند.',
+      'شکاف میان آنچه احساس می‌کنیم و آنچه می‌توانیم بیان کنیم، عمیق و معنادار است. پر کردن این شکاف می‌تواند به‌تدریج روابطمان را تغذیه کند، حس انسانیت ما را تقویت کند و تمدن امروزی را غنی‌تر سازد. و در این مسیر، می‌تواند ذهن، قلب، روح و جان را نیز پرورش دهد.',
+    ],
+    scienceTitle: 'علم پشت این ابزار',
+    scienceParas: [
       '<strong>نام‌گذاری مغز را تغییر می‌دهد.</strong> برچسب‌زدن دقیق به یک احساس، که به برچسب‌زنی عاطفی معروف است، به‌طور قابل اندازه‌گیری فعالیت آمیگدال، مرکز تهدید مغز، را کاهش می‌دهد. احساس کمتری از غرق‌شدن دارید، نه به این دلیل که احساس از بین رفته، بلکه چون زبان به قشر پیش‌پیشانی شما چیزی برای کار کردن می‌دهد.',
       '<strong>دقت عمل را ممکن می‌کند.</strong> «حالم بد است» یک بن‌بست است. «احساس می‌کنم نادیده گرفته شده‌ام و پنهانی دلخورم» دقیقاً به جایی اشاره می‌کند که باید به آن رسیدگی شود. دانه‌بندی عاطفی، یعنی توانایی تشخیص سایه‌های ظریف احساس، با تصمیم‌گیری بهتر، روابط قوی‌تر و انعطاف‌پذیری بیشتر در برابر استرس مرتبط است.',
       '<strong>با گذشت زمان انباشته می‌شود.</strong> هر بار که به دنبال کلمه دقیق‌تری می‌گردید، نقشه‌ای غنی‌تر از زندگی درونی‌تان می‌سازید. آن نقشه پایه خودآگاهی واقعی، ارتباط اصیل و چابکی عاطفی می‌شود که چیزهای دشوار را قابل‌تر می‌کند.',

@@ -233,7 +233,6 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 }
 #profile-btn.has-items .dot { opacity: 1; }
 #theme-btn { left: 20px; top: auto; bottom: 24px; font-size: 22px; }
-#spin-btn  { top: auto; bottom: 24px; right: 20px; }
 
 /* ── Language switcher ── */
 #lang-btn { left: 20px; }
@@ -855,15 +854,6 @@ html.resizing .blur-floor {
     <button class="lang-opt" data-lang="fa" role="option">فارسی<svg class="lang-check" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></button>
   </div>
 </div>
-
-<button id="spin-btn" class="icon-btn" aria-label="Spin circle">
-  <svg id="spin-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M8 5v14l11-7z"/>
-  </svg>
-  <svg id="spin-stop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-    <rect x="5" y="5" width="14" height="14" rx="2"/>
-  </svg>
-</button>
 
 <div id="canvas-blur"></div>
 
@@ -1563,60 +1553,6 @@ function settleToNearest(v0) {
 
 // Immediately snaps to the nearest outer segment, then bounces in place.
 // amplitude = peak swing in degrees (0 = no bounce).
-function snapAndBounce(amplitude = 0) {
-  let best = null, bestDist = Infinity;
-  for (const s of allSegs) {
-    if (s.t !== 'o') continue;
-    const oa = DATA[s.ei].secs[s.si].outSegs[s.oi];
-    const mid = (oa[0] + oa[1]) / 2;
-    const d = Math.abs(shortDelta(-mid, currentRotation));
-    if (d < bestDist) { bestDist = d; best = s; }
-  }
-  if (!best) return;
-
-  const oa  = DATA[best.ei].secs[best.si].outSegs[best.oi];
-  const mid = (oa[0] + oa[1]) / 2;
-  const targetRot = currentRotation + shortDelta(-mid, currentRotation);
-
-  cancelMotion();
-  setRotation(targetRot);
-
-  if (amplitude < 0.5) {
-    // Zero amplitude — just snap and highlight immediately.
-    activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
-    updateURL('o', best.ei, best.si, best.oi);
-    applyHighlight(best.ei, best.si, best.oi, 'o');
-    openEmotionByIndex(best.ei, best.si, best.oi, 'o');
-    return;
-  }
-
-  // Sine-based damped oscillation: starts at 0 (no initial jump), swings
-  // forward in the spin direction, then settles.  cos() was replaced by
-  // sin() so offset(0) = 0 — the snap position is held for one frame
-  // before the bounce arc begins, giving a smooth visual handoff.
-  // Peak at π/(2·ω) ≈ 196 ms (12 frames) — clearly visible.
-  const decay = 4;
-  const omega = 8;
-  const t0 = performance.now();
-  function step(now) {
-    const t = (now - t0) / 1000;
-    const offset = amplitude * Math.exp(-decay * t) * Math.sin(omega * t);
-    setRotation(targetRot + offset);
-    if (t < 1.5 && Math.abs(offset) > 0.05) {
-      snapRAF = requestAnimationFrame(step);
-    } else {
-      // Highlight at settle — same pattern as clicking an emotion (A1).
-      setRotation(targetRot);
-      activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
-      updateURL('o', best.ei, best.si, best.oi);
-      applyHighlight(best.ei, best.si, best.oi, 'o');
-      openEmotionByIndex(best.ei, best.si, best.oi, 'o');
-      snapRAF = null;
-    }
-  }
-  snapRAF = requestAnimationFrame(step);
-}
-
 /* ─── DRAG / MOMENTUM ────────────────────────────────────────────────────── */
 function pointerAngle(clientX, clientY) {
   const rect = wheel.getBoundingClientRect();
@@ -1628,7 +1564,6 @@ function pointerAngle(clientX, clientY) {
 let drag = null;
 
 function pointerDown(clientX, clientY, target) {
-  if (isSpinning) stopSpin(false);
   cancelMotion();
   const a = pointerAngle(clientX, clientY);
   drag = {
@@ -3878,60 +3813,6 @@ document.addEventListener('keydown', e => {
     if (!profileOverlay.hasAttribute('hidden'))  closeProfile();
     if (langMenuOpen) closeLangMenu();
   }
-});
-
-/* ─── AUTO-SPIN ──────────────────────────────────────────────────────────── */
-const spinBtn  = document.getElementById('spin-btn');
-const spinPlay = document.getElementById('spin-play');
-const spinStop = document.getElementById('spin-stop');
-let spinRAF      = null;
-let isSpinning   = false;
-let spinCurrentV = 0; // deg/s — live velocity, updated each frame
-
-// Velocity profile: v(t) = PEAK_V · sin(π·t/T)
-// → zero at start and end, maximum at midpoint (t = T/2)
-// Integrated position: θ(t) = startAngle + PEAK_V·T/π · (1 − cos(π·t/T))
-// Total rotation over full 5 s: PEAK_V · 2T/π ≈ 7.3 full revolutions at 720 deg/s peak
-const SPIN_DURATION = 5000; // ms
-const SPIN_PEAK_V   = 720;  // deg/s at peak — ~2 rev/s
-
-function stopSpin(snap = true) {
-  if (!isSpinning) return;
-  isSpinning = false;
-  if (spinRAF) { cancelAnimationFrame(spinRAF); spinRAF = null; }
-  spinPlay.style.display = '';
-  spinStop.style.display = 'none';
-  spinBtn.setAttribute('aria-label', 'Spin circle');
-  if (snap) {
-    // ratio = 0 → wheel nearly stopped, ratio = 1 → stopped at peak speed
-    const ratio = Math.min(Math.abs(spinCurrentV) / SPIN_PEAK_V, 1);
-    snapAndBounce(16 * ratio); // 0 – 16 degrees of bounce amplitude
-  }
-  spinCurrentV = 0;
-}
-
-function startSpin() {
-  isSpinning = true;
-  clearAll();
-  cancelMotion();
-  spinPlay.style.display = 'none';
-  spinStop.style.display = '';
-  spinBtn.setAttribute('aria-label', 'Stop spinning');
-  const T          = SPIN_DURATION / 1000;
-  const startAngle = currentRotation;
-  const t0         = performance.now();
-  function step(now) {
-    const elapsed = (now - t0) / 1000;
-    if (elapsed >= T) { stopSpin(true); return; }
-    spinCurrentV = SPIN_PEAK_V * Math.sin(Math.PI * elapsed / T);
-    setRotation(startAngle + SPIN_PEAK_V * T / Math.PI * (1 - Math.cos(Math.PI * elapsed / T)));
-    spinRAF = requestAnimationFrame(step);
-  }
-  spinRAF = requestAnimationFrame(step);
-}
-
-spinBtn.addEventListener('click', () => {
-  isSpinning ? stopSpin(true) : startSpin();
 });
 
 /* ─── LANGUAGE SWITCHER ──────────────────────────────────────────────────── */

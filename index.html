@@ -507,6 +507,39 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   border-color: transparent;
 }
 
+/* ── First-visit intro hint pill ────────────────────────────────────────────
+   Shown once via localStorage flag; auto-dismisses on first pointer input.
+   Sits just above the safe-area inset, centred, with the same theming
+   tokens as the overlay card so it visually belongs to the same family. */
+#intro-hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(20px, 4vw, 36px));
+  transform: translateX(-50%) translateY(8px);
+  z-index: 1500;            /* below overlays (2000), above wheel */
+  padding: 12px 22px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.1vw, 16px);
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  pointer-events: none;     /* never blocks taps; first tap dismisses it via document listener */
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#intro-hint.vis {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+#intro-hint[hidden] { display: none; }
+
 #overlay-card h3 {
   font-size: clamp(18px, 1.44vw, 21px); font-weight: 400;
   color: var(--caption); margin: 0 0 7px;
@@ -752,6 +785,10 @@ html.resizing .blur-floor {
 </button>
 
 <div id="canvas-blur"></div>
+
+<!-- First-visit hint pill — shown once, auto-dismisses on first interaction -->
+<div id="intro-hint" hidden role="status" aria-live="polite"><span></span></div>
+
 <div id="overlay" hidden role="dialog" aria-modal="true" aria-labelledby="overlay-title">
   <div id="overlay-card">
     <div class="sheet-handle"></div>
@@ -3601,17 +3638,17 @@ spinBtn.addEventListener('click', () => {
 
 /* UI strings per language */
 const LANG_DATA = {
-  en: { feel:'I feel…',        wheelTitle:'Circle of Feelings',    hint:'Drag to spin · click to select',        howToUse:'How to use',         similar:'Similar words',            sensations:'Typical sensations',         telling:'What is this telling you?',  helping:'How can this help you?', shareThisFeeling:'Share this feeling', linkCopied:'Link copied' },
-  fr: { feel:'Je ressens…',    wheelTitle:'Cercle des sentiments',  hint:'Tournez · touchez pour choisir',         howToUse:"Mode d'emploi",      similar:'Mots similaires',          sensations:'Sensations typiques',        telling:'Que vous dit cela\u00a0?',   helping:'Comment cela peut-il vous aider\u00a0?', shareThisFeeling:'Partager ce sentiment', linkCopied:'Lien copi\u00e9' },
-  es: { feel:'Siento…',        wheelTitle:'Círculo de sentimientos',   hint:'Gira · toca para elegir',                howToUse:'Cómo usar',           similar:'Palabras similares',       sensations:'Sensaciones típicas',        telling:'¿Qué te dice esto?',         helping:'¿Cómo puede ayudarte?', shareThisFeeling:'Compartir este sentimiento', linkCopied:'Enlace copiado' },
-  de: { feel:'Ich fühle…',     wheelTitle:'Gefühlskreis',         hint:'Drehen · klicken zum Wählen',            howToUse:'Anleitung',           similar:'Ähnliche Wörter',          sensations:'Typische Empfindungen',      telling:'Was sagt dir das?',          helping:'Wie kann dir das helfen?', shareThisFeeling:'Dieses Gefühl teilen', linkCopied:'Link kopiert' },
-  pt: { feel:'Eu sinto…',      wheelTitle:'Círculo dos sentimentos',    hint:'Gire · clique para selecionar',          howToUse:'Como usar',           similar:'Palavras similares',       sensations:'Sensações típicas',          telling:'O que isso te diz?',         helping:'Como isso pode te ajudar?', shareThisFeeling:'Compartilhar este sentimento', linkCopied:'Link copiado' },
-  nl: { feel:'Ik voel…',       wheelTitle:'Gevoelscirkel',           hint:'Draai · klik om te kiezen',              howToUse:'Hoe te gebruiken',    similar:'Vergelijkbare woorden',    sensations:'Typische sensaties',         telling:'Wat vertelt dit je?',        helping:'Hoe kan dit je helpen?', shareThisFeeling:'Dit gevoel delen', linkCopied:'Link gekopieerd' },
-  it: { feel:'Mi sento…',      wheelTitle:'Cerchio dei sentimenti',hint:'Trascina · clicca per scegliere',        howToUse:'Come usare',          similar:'Parole simili',            sensations:'Sensazioni tipiche',         telling:'Cosa ti sta dicendo?',       helping:'Come può aiutarti?', shareThisFeeling:'Condividi questo sentimento', linkCopied:'Link copiato' },
-  ja: { feel:'今の気持ち…',    wheelTitle:'気持ちの輪',          hint:'ドラッグで回転・クリックで選択',          howToUse:'使い方',              similar:'類似する言葉',             sensations:'典型的な感覚',               telling:'これはあなたに何を伝えていますか？', helping:'これはどのように役立ちますか？', shareThisFeeling:'この気持ちを共有', linkCopied:'リンクをコピーしました' },
-  zh: { feel:'我感到…',        wheelTitle:'感受圆圈',              hint:'拖动旋转 · 点击选择',                    howToUse:'使用说明',             similar:'相似词语',                 sensations:'典型感受',                   telling:'这在告诉你什么？',           helping:'这如何帮助你？', shareThisFeeling:'分享这份感受', linkCopied:'已复制链接' },
-  ar: { feel:'أشعر…',          wheelTitle:'دائرة المشاعر',        hint:'اسحب للتدوير · انقر للاختيار',           howToUse:'كيفية الاستخدام',     similar:'كلمات مماثلة',             sensations:'الأحاسيس النموذجية',        telling:'ماذا يخبرك هذا؟',           helping:'كيف يمكن أن يساعدك هذا؟', shareThisFeeling:'شارك هذا الشعور', linkCopied:'تم نسخ الرابط' },
-  fa: { feel:'احساس می‌کنم…',  wheelTitle:'دایره احساسات',        hint:'بکشید تا بچرخد · کلیک کنید',            howToUse:'نحوه استفاده',        similar:'کلمات مشابه',              sensations:'احساسات معمول',              telling:'این به شما چه می‌گوید؟',    helping:'این چطور کمک می‌کند؟', shareThisFeeling:'این احساس را به اشتراک بگذارید', linkCopied:'پیوند کپی شد' },
+  en: { feel:'I feel…',        wheelTitle:'Circle of Feelings',    hint:'Drag to spin · click to select',        howToUse:'How to use',         similar:'Similar words',            sensations:'Typical sensations',         telling:'What is this telling you?',  helping:'How can this help you?', shareThisFeeling:'Share this feeling', linkCopied:'Link copied', dragOrTapToExplore:'Drag or tap to explore' },
+  fr: { feel:'Je ressens…',    wheelTitle:'Cercle des sentiments',  hint:'Tournez · touchez pour choisir',         howToUse:"Mode d'emploi",      similar:'Mots similaires',          sensations:'Sensations typiques',        telling:'Que vous dit cela\u00a0?',   helping:'Comment cela peut-il vous aider\u00a0?', shareThisFeeling:'Partager ce sentiment', linkCopied:'Lien copi\u00e9', dragOrTapToExplore:'Glissez ou touchez pour explorer' },
+  es: { feel:'Siento…',        wheelTitle:'Círculo de sentimientos',   hint:'Gira · toca para elegir',                howToUse:'Cómo usar',           similar:'Palabras similares',       sensations:'Sensaciones típicas',        telling:'¿Qué te dice esto?',         helping:'¿Cómo puede ayudarte?', shareThisFeeling:'Compartir este sentimiento', linkCopied:'Enlace copiado', dragOrTapToExplore:'Desliza o toca para explorar' },
+  de: { feel:'Ich fühle…',     wheelTitle:'Gefühlskreis',         hint:'Drehen · klicken zum Wählen',            howToUse:'Anleitung',           similar:'Ähnliche Wörter',          sensations:'Typische Empfindungen',      telling:'Was sagt dir das?',          helping:'Wie kann dir das helfen?', shareThisFeeling:'Dieses Gefühl teilen', linkCopied:'Link kopiert', dragOrTapToExplore:'Wischen oder tippen zum Erkunden' },
+  pt: { feel:'Eu sinto…',      wheelTitle:'Círculo dos sentimentos',    hint:'Gire · clique para selecionar',          howToUse:'Como usar',           similar:'Palavras similares',       sensations:'Sensações típicas',          telling:'O que isso te diz?',         helping:'Como isso pode te ajudar?', shareThisFeeling:'Compartilhar este sentimento', linkCopied:'Link copiado', dragOrTapToExplore:'Arraste ou toque para explorar' },
+  nl: { feel:'Ik voel…',       wheelTitle:'Gevoelscirkel',           hint:'Draai · klik om te kiezen',              howToUse:'Hoe te gebruiken',    similar:'Vergelijkbare woorden',    sensations:'Typische sensaties',         telling:'Wat vertelt dit je?',        helping:'Hoe kan dit je helpen?', shareThisFeeling:'Dit gevoel delen', linkCopied:'Link gekopieerd', dragOrTapToExplore:'Sleep of tik om te verkennen' },
+  it: { feel:'Mi sento…',      wheelTitle:'Cerchio dei sentimenti',hint:'Trascina · clicca per scegliere',        howToUse:'Come usare',          similar:'Parole simili',            sensations:'Sensazioni tipiche',         telling:'Cosa ti sta dicendo?',       helping:'Come può aiutarti?', shareThisFeeling:'Condividi questo sentimento', linkCopied:'Link copiato', dragOrTapToExplore:'Trascina o tocca per esplorare' },
+  ja: { feel:'今の気持ち…',    wheelTitle:'気持ちの輪',          hint:'ドラッグで回転・クリックで選択',          howToUse:'使い方',              similar:'類似する言葉',             sensations:'典型的な感覚',               telling:'これはあなたに何を伝えていますか？', helping:'これはどのように役立ちますか？', shareThisFeeling:'この気持ちを共有', linkCopied:'リンクをコピーしました', dragOrTapToExplore:'ドラッグまたはタップして探索' },
+  zh: { feel:'我感到…',        wheelTitle:'感受圆圈',              hint:'拖动旋转 · 点击选择',                    howToUse:'使用说明',             similar:'相似词语',                 sensations:'典型感受',                   telling:'这在告诉你什么？',           helping:'这如何帮助你？', shareThisFeeling:'分享这份感受', linkCopied:'已复制链接', dragOrTapToExplore:'拖动或点击探索' },
+  ar: { feel:'أشعر…',          wheelTitle:'دائرة المشاعر',        hint:'اسحب للتدوير · انقر للاختيار',           howToUse:'كيفية الاستخدام',     similar:'كلمات مماثلة',             sensations:'الأحاسيس النموذجية',        telling:'ماذا يخبرك هذا؟',           helping:'كيف يمكن أن يساعدك هذا؟', shareThisFeeling:'شارك هذا الشعور', linkCopied:'تم نسخ الرابط', dragOrTapToExplore:'اسحب أو انقر للاستكشاف' },
+  fa: { feel:'احساس می‌کنم…',  wheelTitle:'دایره احساسات',        hint:'بکشید تا بچرخد · کلیک کنید',            howToUse:'نحوه استفاده',        similar:'کلمات مشابه',              sensations:'احساسات معمول',              telling:'این به شما چه می‌گوید؟',    helping:'این چطور کمک می‌کند؟', shareThisFeeling:'این احساس را به اشتراک بگذارید', linkCopied:'پیوند کپی شد', dragOrTapToExplore:'بکشید یا ضربه بزنید تا کاوش کنید' },
 };
 
 /* Emotion translation table — columns: en, fr, es, de, pt, nl, it, ja, zh, ar, fa */
@@ -4310,6 +4347,37 @@ document.addEventListener('click', () => { if (langMenuOpen) closeLangMenu(); })
   const entry = slugIndex[slug];
   if (!entry) return;
   snapToSeg(entry.t, entry.ei, entry.si, entry.oi, 600);
+})();
+
+/* ─── FIRST-VISIT INTRO HINT ─────────────────────────────────────────────────
+   Single localStorage flag (cof-hint-seen) — show once ever, then never again.
+   Auto-dismisses on the very first pointerdown anywhere on the document
+   (tapping a segment, dragging the wheel, opening any menu — all count). */
+(function showIntroHint() {
+  const FLAG = 'cof-hint-seen';
+  let stored = null;
+  try { stored = localStorage.getItem(FLAG); } catch (e) { /* private mode etc. */ }
+  if (stored) return;
+
+  const hint = document.getElementById('intro-hint');
+  if (!hint) return;
+  hint.querySelector('span').textContent = tUI('dragOrTapToExplore');
+  hint.removeAttribute('hidden');
+
+  // Slight delay so the page has settled visually before the hint slides in.
+  setTimeout(() => hint.classList.add('vis'), 400);
+
+  function dismiss() {
+    hint.classList.remove('vis');
+    const onEnd = (e) => {
+      if (e.propertyName !== 'opacity') return;
+      hint.removeEventListener('transitionend', onEnd);
+      hint.setAttribute('hidden', '');
+    };
+    hint.addEventListener('transitionend', onEnd);
+    try { localStorage.setItem(FLAG, '1'); } catch (e) { /* ignore */ }
+  }
+  document.addEventListener('pointerdown', dismiss, { once: true });
 })();
 </script>
 </body>

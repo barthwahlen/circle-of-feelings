@@ -6,10 +6,6 @@ An interactive wheel for finding the right word for what you're feeling — with
 
 <!-- Add a screenshot here later: ![Circle of Feelings](./screenshot.png) -->
 
-> _A few years ago I realised I couldn't answer a simple question my partner asked me: "how do you feel?" I knew there was something, but the words wouldn't come. "Good" or "bad" were the best I could manage._
->
-> _Most adults use about a dozen words to describe their inner experience, even though we feel far more than that. The gap between the feelings we experience and what we can name really matters._
-
 ## Why naming feelings matters
 
 Naming an emotion precisely — known as **affect labelling** — measurably reduces activity in the amygdala, the brain's threat centre. You feel less overwhelmed not because the feeling went away, but because language gives your prefrontal cortex something to work with.

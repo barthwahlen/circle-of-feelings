@@ -3676,6 +3676,22 @@ function findEmotionIndex(name) {
   return -1;
 }
 
+function findSegmentForEmotion(name) {
+  // Returns { t, EI, SI, OI } for any canonical name — used to mirror the
+  // wheel-click snap when launching an emotion from the My emotions list.
+  for (let i = 0; i < DATA.length; i++) {
+    const d = DATA[i];
+    if (d.core === name) return { t: 'c', EI: i, SI: 0, OI: 0 };
+    for (let j = 0; j < d.secs.length; j++) {
+      const s = d.secs[j];
+      if (s.mid === name) return { t: 'm', EI: i, SI: j, OI: 0 };
+      const k = s.out.indexOf(name);
+      if (k !== -1) return { t: 'o', EI: i, SI: j, OI: k };
+    }
+  }
+  return null;
+}
+
 function updateAddButton(name) {
   const inProfile = profile.includes(name);
   const isFull    = profile.length >= PROFILE_MAX;
@@ -3757,13 +3773,29 @@ profileBody.addEventListener('click', e => {
     if (row) removeFromProfile(row.dataset.name);
     return;
   }
-  // Row click → open the corresponding emotion overlay
+  // Row click → spin the wheel to the emotion (with bounce, like a wheel-click)
+  // AND open the emotion overlay in vis state via the standard overlay swap.
   const row = e.target.closest('.profile-row');
   if (!row) return;
   const name = row.dataset.name;
-  const EI = findEmotionIndex(name);
-  if (EI < 0) return;
-  switchToOverlay(() => openOverlay(name, EI, { expand: true }));
+  const seg = findSegmentForEmotion(name);
+  if (!seg) return;
+
+  // Mirror snapToSeg's core: rotate to the segment midpoint with bounce,
+  // and at settle apply the same activeKey / URL / highlight as a wheel-click.
+  let mid;
+  if      (seg.t === 'c') { const e_  = DATA[seg.EI];                                mid = (e_.a0 + e_.a1) / 2; }
+  else if (seg.t === 'm') { const sec = DATA[seg.EI].secs[seg.SI];                   mid = (sec.a0 + sec.a1) / 2; }
+  else                    { const oa  = DATA[seg.EI].secs[seg.SI].outSegs[seg.OI];   mid = (oa[0] + oa[1]) / 2; }
+  const target = currentRotation + shortDelta(-mid, currentRotation);
+  animateRotationTo(target, 1100, () => {
+    activeKey = `${seg.t}:${seg.EI}:${seg.SI}:${seg.OI}`;
+    updateURL(seg.t, seg.EI, seg.SI, seg.OI);
+    applyHighlight(seg.EI, seg.SI, seg.OI, seg.t);
+  });
+
+  // In parallel: dismiss profile → open emotion sheet directly in vis state.
+  switchToOverlay(() => openOverlay(name, seg.EI, { expand: true }));
 });
 
 function openProfile() {

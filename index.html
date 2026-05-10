@@ -3583,12 +3583,14 @@ function hideOverlay() {
   }
 }
 function closeOverlay() {
-  // In peek state the sheet is already collapsed — × should dismiss entirely.
-  // In vis state — collapse back to peek.
-  if (overlay.classList.contains('peek')) { clearAll(); } else { collapseOverlay(); }
+  // Both peek and vis dismiss entirely — clearAll() animates the slide-down
+  // (peek path uses WAAPI, vis path uses CSS transition via hideOverlay).
+  clearAll();
 }
 
-addSheetDrag(overlay, overlayCard, collapseOverlay, clearAll, expandOverlay);
+// In vis state, drag-down / handle-tap now dismiss completely instead of
+// collapsing to peek. Peek-state drag-down still dismisses (was already).
+addSheetDrag(overlay, overlayCard, clearAll, clearAll, expandOverlay);
 
 // Click anywhere on the peeked card to expand to full
 overlayCard.addEventListener('click', () => { if (overlay.classList.contains('peek')) expandOverlay(); });

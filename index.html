@@ -1408,7 +1408,7 @@ document.getElementById('ifeel-circle').addEventListener('click', () => { if (ac
 
 let _overlayEI = 0, _overlayName = '';
 
-function setBreadcrumb(EI, SI, OI, t) {
+function openEmotionByIndex(EI, SI, OI, t) {
   const coreN = DATA[EI].core;
   const midN  = t !== 'c' ? DATA[EI].secs[SI].mid     : null;
   const outN  = t === 'o' ? DATA[EI].secs[SI].out[OI] : null;
@@ -1491,7 +1491,7 @@ function snapToSeg(t, EI, SI, OI, duration = 1100, ease = easeInOut) {
     activeKey = `${t}:${EI}:${SI}:${OI}`;
     updateURL(t, EI, SI, OI);
     applyHighlight(EI, SI, OI, t);
-    setBreadcrumb(EI, SI, OI, t);
+    openEmotionByIndex(EI, SI, OI, t);
   }, ease);
 }
 
@@ -1554,7 +1554,7 @@ function settleToNearest(v0) {
       activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
       updateURL('o', best.ei, best.si, best.oi);
       applyHighlight(best.ei, best.si, best.oi, 'o');
-      setBreadcrumb(best.ei, best.si, best.oi, 'o');
+      openEmotionByIndex(best.ei, best.si, best.oi, 'o');
       snapRAF = null;
     }
   }
@@ -1586,7 +1586,7 @@ function snapAndBounce(amplitude = 0) {
     activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
     updateURL('o', best.ei, best.si, best.oi);
     applyHighlight(best.ei, best.si, best.oi, 'o');
-    setBreadcrumb(best.ei, best.si, best.oi, 'o');
+    openEmotionByIndex(best.ei, best.si, best.oi, 'o');
     return;
   }
 
@@ -1610,7 +1610,7 @@ function snapAndBounce(amplitude = 0) {
       activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
       updateURL('o', best.ei, best.si, best.oi);
       applyHighlight(best.ei, best.si, best.oi, 'o');
-      setBreadcrumb(best.ei, best.si, best.oi, 'o');
+      openEmotionByIndex(best.ei, best.si, best.oi, 'o');
       snapRAF = null;
     }
   }
@@ -3581,7 +3581,7 @@ function hideOverlay() {
 }
 // Dismiss the emotion overlay from vis state with the same animation path
 // as info / profile. The wheel-state cleanup (segment class removal, URL,
-// breadcrumb) is deferred until AFTER the slide so the paint it causes
+// selected label) is deferred until AFTER the slide so the paint it causes
 // doesn't fight the card's transform transition.
 function dismissEmotionFromVis() {
   overlayCard.style.transform = '';
@@ -4689,7 +4689,7 @@ function setLanguage(lang) {
   if (activeKey) {
     const parts = activeKey.split(':');
     const t = parts[0], EI = +parts[1], SI = +parts[2], OI = +parts[3];
-    setBreadcrumb(EI, SI, OI, t);
+    openEmotionByIndex(EI, SI, OI, t);
   }
   document.querySelectorAll('.lang-opt').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.lang === lang);
@@ -4720,7 +4720,7 @@ document.addEventListener('click', () => { if (langMenuOpen) closeLangMenu(); })
 
 /* ─── DEEP-LINK ON LOAD ──────────────────────────────────────────────────── */
 (function applyHashOnLoad() {
-  // restore language first so wheel labels and breadcrumb render in the right locale
+  // restore language first so wheel labels render in the right locale
   const langParam = new URLSearchParams(location.search).get('lang');
   if (langParam && LANG_DATA[langParam]) setLanguage(langParam);
 

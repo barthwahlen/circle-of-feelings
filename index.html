@@ -3227,8 +3227,9 @@ const ovHHelping    = document.getElementById('ov-h-helping');
 const ovShare       = document.getElementById('share-feeling');
 
 let _currentEmotion = null;
-function openOverlay(name, EI) {
+function openOverlay(name, EI, opts) {
   _currentEmotion = name;
+  const expand = !!(opts && opts.expand);
   const d = tED(name) ?? { similar:[], sensations:'—', telling:'—', helping:'—' };
   const color = DATA[EI].palette.bg;
   ovBar.style.background    = color;
@@ -3256,16 +3257,25 @@ function openOverlay(name, EI) {
     const peekH = overlayTitle.offsetTop + overlayTitle.offsetHeight + 20;
     document.documentElement.style.setProperty('--peek-h', peekH + 'px');
     requestAnimationFrame(() => {
-      overlay.classList.add('peek');
-      // After the slide-in settles, nudge up to hint at scrollable content
-      overlayCard.addEventListener('transitionend', function h(e) {
-        if (e.propertyName !== 'transform') return;
-        overlayCard.removeEventListener('transitionend', h);
-        nudgePeek();
-      });
+      if (expand) {
+        // Open straight to full view (used when launched from My emotions)
+        overlay.classList.add('vis');
+        setCanvasBlur(true);
+      } else {
+        overlay.classList.add('peek');
+        // After the slide-in settles, nudge up to hint at scrollable content
+        overlayCard.addEventListener('transitionend', function h(e) {
+          if (e.propertyName !== 'transform') return;
+          overlayCard.removeEventListener('transitionend', h);
+          nudgePeek();
+        });
+      }
     });
+  } else if (expand && overlay.classList.contains('peek')) {
+    // Already showing in peek (rare path) — promote to vis
+    expandOverlay();
   }
-  // If already peek or vis: content already updated above, no state change needed
+  // If already vis: content already updated above, no state change needed
 }
 
 // ─── Share button: copy current URL (carries ?lang= and #emotion-slug) ───
@@ -3799,7 +3809,7 @@ profileBody.addEventListener('click', e => {
   const name = row.dataset.name;
   const EI = findEmotionIndex(name);
   if (EI < 0) return;
-  switchToOverlay(() => openOverlay(name, EI));
+  switchToOverlay(() => openOverlay(name, EI, { expand: true }));
 });
 
 function openProfile() {

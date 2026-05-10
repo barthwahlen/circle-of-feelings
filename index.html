@@ -3579,15 +3579,35 @@ function hideOverlay() {
     animClose(overlay);
   }
 }
-function closeOverlay() {
-  // Both peek and vis dismiss entirely — clearAll() animates the slide-down
-  // (peek path uses WAAPI, vis path uses CSS transition via hideOverlay).
-  clearAll();
+// Dismiss the emotion overlay from vis state with the same animation path
+// as info / profile. The wheel-state cleanup (segment class removal, URL,
+// breadcrumb) is deferred until AFTER the slide so the paint it causes
+// doesn't fight the card's transform transition.
+function dismissEmotionFromVis() {
+  overlayCard.style.transform = '';
+  setCanvasBlur(false);
+  animClose(overlay);
+  // Defer wheel/URL cleanup until the slide-down has finished.
+  setTimeout(() => {
+    activeKey = null;
+    clearURL();
+    allSegs.forEach(s => s.el.classList.remove('hi', 'dim'));
+    clearWheelLabel();
+  }, 240);   // > 0.22 s opacity transition end
 }
 
-// In vis state, drag-down / handle-tap now dismiss completely instead of
-// collapsing to peek. Peek-state drag-down still dismisses (was already).
-addSheetDrag(overlay, overlayCard, clearAll, clearAll, expandOverlay);
+function closeOverlay() {
+  if (overlay.classList.contains('vis')) {
+    dismissEmotionFromVis();
+  } else {
+    // Peek state — existing WAAPI off-screen animation via clearAll/hideOverlay.
+    clearAll();
+  }
+}
+
+// Sheet drag in vis: dismiss completely (deferred wheel cleanup, like closeHelp).
+// Sheet drag in peek: still dismiss completely via clearAll (existing WAAPI path).
+addSheetDrag(overlay, overlayCard, dismissEmotionFromVis, clearAll, expandOverlay);
 
 // Click anywhere on the peeked card to expand to full
 overlayCard.addEventListener('click', () => { if (overlay.classList.contains('peek')) expandOverlay(); });

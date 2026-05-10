@@ -3264,8 +3264,9 @@ function addSheetDrag(backdropEl, cardEl, collapseFn, dismissFn, expandFn) {
     // Cancel any pending nudge hint so drag takes over cleanly
     if (cardEl._nudgeTimer) { clearTimeout(cardEl._nudgeTimer); cardEl._nudgeTimer = null; }
     if (cardEl._nudgeSB)    { cardEl.removeEventListener('transitionend', cardEl._nudgeSB); cardEl._nudgeSB = null; }
-    const scrollEl = cardEl.querySelector('.overlay-body, .info-panel.active');
-    if (scrollEl && scrollEl.scrollTop > 0) return;
+    // Note: drag only engages from the top 80 px (touch) or the .sheet-handle (mouse) —
+    // both above the scrollable region — so we don't need to guard against scrollTop > 0.
+    // An earlier guard here broke collapse/dismiss whenever the body had been scrolled.
     if (startY !== null) return;           // guard against double-start
     startY = lastY = y;
     lastT  = performance.now();

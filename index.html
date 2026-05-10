@@ -220,8 +220,19 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 .icon-btn:hover { background: var(--btn-hover); }
 .icon-btn svg { width: 35px; height: 35px; }
 #help-btn  { right: 20px; font-size: 31px; font-family: var(--font-heading); }
+#profile-btn { top: auto; bottom: 24px; right: 20px; }
+#profile-btn .dot {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--strong);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+#profile-btn.has-items .dot { opacity: 1; }
 #theme-btn { left: 20px; top: auto; bottom: 24px; font-size: 22px; }
-#spin-btn  { top: auto; bottom: 24px; right: 20px; }
 
 /* ── Language switcher ── */
 #lang-btn { left: 20px; }
@@ -339,26 +350,26 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   -webkit-backdrop-filter: blur(24px);
 }
 
-#overlay, #help-overlay {
+#overlay, #help-overlay, #profile-overlay {
   position: fixed; inset: 0;
   background: transparent;
   display: flex; align-items: flex-end; justify-content: center;
-  z-index: 2000; padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
+  z-index: 2000; padding: 0;
   opacity: 0;
   transition: opacity 0.22s ease;
 }
-#overlay.vis, #help-overlay.vis { opacity: 1; }
-#overlay[hidden], #help-overlay[hidden] { display: none; }
+#overlay.vis, #help-overlay.vis, #profile-overlay.vis { opacity: 1; }
+#overlay[hidden], #help-overlay[hidden], #profile-overlay[hidden] { display: none; }
 
 /* ── Shared overlay card shell ── */
-#overlay-card, #help-card {
+#overlay-card, #help-card, #profile-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-bottom: none;
   border-radius: 20px 20px 0 0;
-  max-height: min(92dvh, 900px);
+  max-height: 92dvh;
   width: min(100vw, 640px);
-  padding: 16px clamp(32px, 4vw, 64px) clamp(36px, 3.5vw, 56px);
+  padding: 16px clamp(32px, 4vw, 64px) calc(clamp(28px, 3vw, 44px) + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column;
   position: relative; z-index: 1;
   color: var(--text);
@@ -369,14 +380,15 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
 }
 #overlay.vis #overlay-card,
-#help-overlay.vis #help-card { transform: translateY(0); }
+#help-overlay.vis #help-card,
+#profile-overlay.vis #profile-card { transform: translateY(0); }
 
 /* Background extension: moves with the card's transform so it always
    fills the gap between the card's bottom edge and the viewport bottom
    when the card is dragged upward. No backdrop-filter here (it would be
    clipped by the card's transform stacking context) — just the background
    colour so the gap doesn't expose a hard edge. */
-#overlay-card::after, #help-card::after {
+#overlay-card::after, #help-card::after, #profile-card::after {
   content: '';
   position: absolute;
   left: -1px; right: -1px; /* align with outside of card border */
@@ -460,7 +472,7 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 .share-feeling-btn {
   display: block;
   width: 100%;
-  margin: clamp(20px, 2.5vw, 32px) 0 0;
+  margin: clamp(10px, 1.25vw, 16px) 0 0;
   padding: 14px 16px;
   border: 1px solid var(--card-border);
   border-radius: 12px;
@@ -480,6 +492,95 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   color: var(--strong);
   border-color: transparent;
 }
+
+/* ── Add / Remove profile-toggle button (sits above share button) ──────────
+   The button toggles between "Add to my emotions" and "Remove from my
+   emotions". The optional "5 max" full-state message floats below the
+   button via absolute positioning so it never affects label centring. */
+.add-feeling-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: clamp(20px, 2.5vw, 32px) 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.add-feeling-btn:hover  { background: var(--btn-hover); }
+.add-feeling-btn:active { background: var(--tab-active); }
+.add-feeling-btn .full-msg {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 4px);
+  font-size: clamp(13px, 1vw, 15px);
+  font-weight: 400;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.add-feeling-btn.show-full .full-msg { opacity: 1; }
+
+/* ── Profile overlay rows + empty state ──────────────────────────────────── */
+.profile-empty {
+  text-align: center;
+  color: var(--muted);
+  font-size: clamp(16px, 1.3vw, 19px);
+  margin: clamp(40px, 6vw, 80px) 0;
+}
+.profile-list {
+  display: flex; flex-direction: column;
+  gap: 10px;
+}
+.profile-row {
+  display: flex; align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-row:hover { background: var(--btn-hover); }
+.profile-row:active { background: var(--tab-active); }
+.profile-row .swatch {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
+}
+.profile-row .name {
+  flex: 1;
+  font-size: clamp(16px, 1.3vw, 19px);
+  font-weight: 500;
+  color: var(--text);
+}
+.profile-row .remove {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 22px; line-height: 1;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-row .remove:hover { background: var(--btn-hover); color: var(--text); }
 
 /* ── First-visit intro hint pill ────────────────────────────────────────────
    Shown once via localStorage flag; auto-dismisses on first pointer input.
@@ -605,7 +706,7 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 
 
 /* ── Shared card heading ── */
-#overlay-title, #help-title {
+#overlay-title, #help-title, #profile-title {
   font-family: var(--font-heading);
   font-size: clamp(1.875rem, 2.75vw, 2.75rem); font-weight: 600;
   color: var(--strong); margin: 0 0 clamp(20px, 2.5vw, 34px);
@@ -688,13 +789,15 @@ html.resizing #lang-menu {
 }
 html.resizing #canvas-blur,
 html.resizing #overlay,
-html.resizing #help-overlay {
+html.resizing #help-overlay,
+html.resizing #profile-overlay {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   transition: none !important;
 }
 html.resizing #overlay-card,
 html.resizing #help-card,
+html.resizing #profile-card,
 html.resizing .blur-floor {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -713,6 +816,13 @@ html.resizing .blur-floor {
 <div id="pointer-mobile"></div>
 
 <button id="theme-btn" class="icon-btn" aria-label="Toggle theme"><span id="theme-icon">☀</span></button>
+<button id="profile-btn" class="icon-btn" aria-label="My emotions">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+  </svg>
+  <span class="dot" aria-hidden="true"></span>
+</button>
 <button id="help-btn" class="icon-btn" aria-label="Info">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="10"/>
@@ -744,15 +854,6 @@ html.resizing .blur-floor {
   </div>
 </div>
 
-<button id="spin-btn" class="icon-btn" aria-label="Spin circle">
-  <svg id="spin-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M8 5v14l11-7z"/>
-  </svg>
-  <svg id="spin-stop" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-    <rect x="5" y="5" width="14" height="14" rx="2"/>
-  </svg>
-</button>
-
 <div id="canvas-blur"></div>
 
 <!-- First-visit hint pill — shown once, auto-dismisses on first interaction -->
@@ -780,7 +881,21 @@ html.resizing .blur-floor {
         <h3 id="ov-h-helping">How can this help you?</h3>
         <p id="ov-helping"></p>
       </section>
+      <button id="add-feeling" class="add-feeling-btn" type="button">
+        <span class="label"></span>
+        <span class="full-msg"></span>
+      </button>
       <button id="share-feeling" class="share-feeling-btn" type="button"></button>
+    </div>
+  </div>
+</div>
+
+<div id="profile-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="profile-title">
+  <div id="profile-card">
+    <div class="sheet-handle"></div>
+    <h2 id="profile-title"></h2>
+    <div class="overlay-body">
+      <div id="profile-body"></div>
     </div>
   </div>
 </div>
@@ -1282,7 +1397,7 @@ document.getElementById('ifeel-circle').addEventListener('click', () => { if (ac
 
 let _overlayEI = 0, _overlayName = '';
 
-function setBreadcrumb(EI, SI, OI, t) {
+function openEmotionByIndex(EI, SI, OI, t) {
   const coreN = DATA[EI].core;
   const midN  = t !== 'c' ? DATA[EI].secs[SI].mid     : null;
   const outN  = t === 'o' ? DATA[EI].secs[SI].out[OI] : null;
@@ -1365,7 +1480,7 @@ function snapToSeg(t, EI, SI, OI, duration = 1100, ease = easeInOut) {
     activeKey = `${t}:${EI}:${SI}:${OI}`;
     updateURL(t, EI, SI, OI);
     applyHighlight(EI, SI, OI, t);
-    setBreadcrumb(EI, SI, OI, t);
+    openEmotionByIndex(EI, SI, OI, t);
   }, ease);
 }
 
@@ -1428,7 +1543,7 @@ function settleToNearest(v0) {
       activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
       updateURL('o', best.ei, best.si, best.oi);
       applyHighlight(best.ei, best.si, best.oi, 'o');
-      setBreadcrumb(best.ei, best.si, best.oi, 'o');
+      openEmotionByIndex(best.ei, best.si, best.oi, 'o');
       snapRAF = null;
     }
   }
@@ -1437,60 +1552,6 @@ function settleToNearest(v0) {
 
 // Immediately snaps to the nearest outer segment, then bounces in place.
 // amplitude = peak swing in degrees (0 = no bounce).
-function snapAndBounce(amplitude = 0) {
-  let best = null, bestDist = Infinity;
-  for (const s of allSegs) {
-    if (s.t !== 'o') continue;
-    const oa = DATA[s.ei].secs[s.si].outSegs[s.oi];
-    const mid = (oa[0] + oa[1]) / 2;
-    const d = Math.abs(shortDelta(-mid, currentRotation));
-    if (d < bestDist) { bestDist = d; best = s; }
-  }
-  if (!best) return;
-
-  const oa  = DATA[best.ei].secs[best.si].outSegs[best.oi];
-  const mid = (oa[0] + oa[1]) / 2;
-  const targetRot = currentRotation + shortDelta(-mid, currentRotation);
-
-  cancelMotion();
-  setRotation(targetRot);
-
-  if (amplitude < 0.5) {
-    // Zero amplitude — just snap and highlight immediately.
-    activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
-    updateURL('o', best.ei, best.si, best.oi);
-    applyHighlight(best.ei, best.si, best.oi, 'o');
-    setBreadcrumb(best.ei, best.si, best.oi, 'o');
-    return;
-  }
-
-  // Sine-based damped oscillation: starts at 0 (no initial jump), swings
-  // forward in the spin direction, then settles.  cos() was replaced by
-  // sin() so offset(0) = 0 — the snap position is held for one frame
-  // before the bounce arc begins, giving a smooth visual handoff.
-  // Peak at π/(2·ω) ≈ 196 ms (12 frames) — clearly visible.
-  const decay = 4;
-  const omega = 8;
-  const t0 = performance.now();
-  function step(now) {
-    const t = (now - t0) / 1000;
-    const offset = amplitude * Math.exp(-decay * t) * Math.sin(omega * t);
-    setRotation(targetRot + offset);
-    if (t < 1.5 && Math.abs(offset) > 0.05) {
-      snapRAF = requestAnimationFrame(step);
-    } else {
-      // Highlight at settle — same pattern as clicking an emotion (A1).
-      setRotation(targetRot);
-      activeKey = `o:${best.ei}:${best.si}:${best.oi}`;
-      updateURL('o', best.ei, best.si, best.oi);
-      applyHighlight(best.ei, best.si, best.oi, 'o');
-      setBreadcrumb(best.ei, best.si, best.oi, 'o');
-      snapRAF = null;
-    }
-  }
-  snapRAF = requestAnimationFrame(step);
-}
-
 /* ─── DRAG / MOMENTUM ────────────────────────────────────────────────────── */
 function pointerAngle(clientX, clientY) {
   const rect = wheel.getBoundingClientRect();
@@ -1502,7 +1563,6 @@ function pointerAngle(clientX, clientY) {
 let drag = null;
 
 function pointerDown(clientX, clientY, target) {
-  if (isSpinning) stopSpin(false);
   cancelMotion();
   const a = pointerAngle(clientX, clientY);
   drag = {
@@ -1616,7 +1676,7 @@ window.addEventListener('touchend',    () => pointerUp());
 window.addEventListener('touchcancel', () => pointerUp());
 
 document.addEventListener('click', e => {
-  if (e.target.closest('#wheel-frame, #overlay, #help-overlay, .icon-btn')) return;
+  if (e.target.closest('#wheel-frame, #overlay, #help-overlay, #profile-overlay, .icon-btn')) return;
   if (activeKey) clearAll();
 });
 
@@ -3100,7 +3160,10 @@ const ovHTelling    = document.getElementById('ov-h-telling');
 const ovHHelping    = document.getElementById('ov-h-helping');
 const ovShare       = document.getElementById('share-feeling');
 
-function openOverlay(name, EI) {
+let _currentEmotion = null;
+function openOverlay(name, EI, opts) {
+  _currentEmotion = name;
+  const expand = !!(opts && opts.expand);
   const d = tED(name) ?? { similar:[], sensations:'—', telling:'—', helping:'—' };
   const color = DATA[EI].palette.bg;
   ovBar.style.background    = color;
@@ -3118,6 +3181,7 @@ function openOverlay(name, EI) {
   if (ovShare._revertTimer) { clearTimeout(ovShare._revertTimer); ovShare._revertTimer = null; }
   ovShare.classList.remove('copied');
   ovShare.textContent = tUI('shareThisFeeling');
+  updateAddButton(name);
   // Open in peek state; if already vis, keep it open to avoid collapsing mid-read
   if (overlay.hasAttribute('hidden') || (!overlay.classList.contains('vis') && !overlay.classList.contains('peek'))) {
     overlay.removeAttribute('hidden');
@@ -3127,16 +3191,25 @@ function openOverlay(name, EI) {
     const peekH = overlayTitle.offsetTop + overlayTitle.offsetHeight + 20;
     document.documentElement.style.setProperty('--peek-h', peekH + 'px');
     requestAnimationFrame(() => {
-      overlay.classList.add('peek');
-      // After the slide-in settles, nudge up to hint at scrollable content
-      overlayCard.addEventListener('transitionend', function h(e) {
-        if (e.propertyName !== 'transform') return;
-        overlayCard.removeEventListener('transitionend', h);
-        nudgePeek();
-      });
+      if (expand) {
+        // Open straight to full view (used when launched from My emotions)
+        overlay.classList.add('vis');
+        setCanvasBlur(true);
+      } else {
+        overlay.classList.add('peek');
+        // After the slide-in settles, nudge up to hint at scrollable content
+        overlayCard.addEventListener('transitionend', function h(e) {
+          if (e.propertyName !== 'transform') return;
+          overlayCard.removeEventListener('transitionend', h);
+          nudgePeek();
+        });
+      }
     });
+  } else if (expand && overlay.classList.contains('peek')) {
+    // Already showing in peek (rare path) — promote to vis
+    expandOverlay();
   }
-  // If already peek or vis: content already updated above, no state change needed
+  // If already vis: content already updated above, no state change needed
 }
 
 // ─── Share button: copy current URL (carries ?lang= and #emotion-slug) ───
@@ -3433,23 +3506,42 @@ function hideOverlay() {
       anim.cancel(); // remove fill, hand back to CSS
     };
   } else {
-    // vis state: remove class → card slides to translateY(100%), backdrop fades.
-    overlay.classList.remove('vis');
-    setCanvasBlur(false);
+    // vis state: clear any leftover inline transform from drag, then dismiss
+    // via the same path as info / profile so the card slides down identically.
     overlayCard.style.transform = '';
-    overlayCard.addEventListener('transitionend', function h() {
-      overlayCard.removeEventListener('transitionend', h);
-      overlay.setAttribute('hidden', '');
-    });
+    setCanvasBlur(false);
+    animClose(overlay);
   }
 }
-function closeOverlay() {
-  // In peek state the sheet is already collapsed — × should dismiss entirely.
-  // In vis state — collapse back to peek.
-  if (overlay.classList.contains('peek')) { clearAll(); } else { collapseOverlay(); }
+// Dismiss the emotion overlay from vis state with the same animation path
+// as info / profile. The wheel-state cleanup (segment class removal, URL,
+// selected label) is deferred until AFTER the slide so the paint it causes
+// doesn't fight the card's transform transition.
+function dismissEmotionFromVis() {
+  overlayCard.style.transform = '';
+  setCanvasBlur(false);
+  animClose(overlay);
+  // Defer wheel/URL cleanup until the slide-down has finished.
+  setTimeout(() => {
+    activeKey = null;
+    clearURL();
+    allSegs.forEach(s => s.el.classList.remove('hi', 'dim'));
+    clearWheelLabel();
+  }, 240);   // > 0.22 s opacity transition end
 }
 
-addSheetDrag(overlay, overlayCard, collapseOverlay, clearAll, expandOverlay);
+function closeOverlay() {
+  if (overlay.classList.contains('vis')) {
+    dismissEmotionFromVis();
+  } else {
+    // Peek state — existing WAAPI off-screen animation via clearAll/hideOverlay.
+    clearAll();
+  }
+}
+
+// Sheet drag in vis: dismiss completely (deferred wheel cleanup, like closeHelp).
+// Sheet drag in peek: still dismiss completely via clearAll (existing WAAPI path).
+addSheetDrag(overlay, overlayCard, dismissEmotionFromVis, clearAll, expandOverlay);
 
 // Click anywhere on the peeked card to expand to full
 overlayCard.addEventListener('click', () => { if (overlay.classList.contains('peek')) expandOverlay(); });
@@ -3460,7 +3552,6 @@ overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(
 const helpOverlay = document.getElementById('help-overlay');
 
 function openHelp() {
-  clearAll(true);   // dismiss emotion overlay instantly if open
   renderHelpOverlay();
   helpOverlay.removeAttribute('hidden');
   requestAnimationFrame(() => { helpOverlay.classList.add('vis'); setCanvasBlur(true); });
@@ -3469,7 +3560,7 @@ function openHelp() {
 function closeHelp() { setCanvasBlur(false); animClose(helpOverlay); }
 addSheetDrag(helpOverlay, document.getElementById('help-card'), closeHelp);
 
-document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-btn').addEventListener('click', () => switchToOverlay(openHelp));
 helpOverlay.addEventListener('click', e => { if (e.target === helpOverlay) closeHelp(); });
 
 /* ─── HELP OVERLAY RENDER ────────────────────────────────────────────────── */
@@ -3538,83 +3629,232 @@ document.querySelectorAll('.info-tab').forEach(tab => {
   });
 });
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    if (!overlay.hasAttribute('hidden'))     closeOverlay();
-    if (!helpOverlay.hasAttribute('hidden')) closeHelp();
-    if (langMenuOpen) closeLangMenu();
+/* ─── MY EMOTIONS PROFILE ────────────────────────────────────────────────── */
+const PROFILE_KEY = 'cof-profile';
+const PROFILE_MAX = 5;
+
+const profileBtn     = document.getElementById('profile-btn');
+const profileOverlay = document.getElementById('profile-overlay');
+const profileCard    = document.getElementById('profile-card');
+const profileTitle   = document.getElementById('profile-title');
+const profileBody    = document.getElementById('profile-body');
+const addBtn         = document.getElementById('add-feeling');
+const addBtnLabel    = addBtn.querySelector('.label');
+const addBtnFullMsg  = addBtn.querySelector('.full-msg');
+
+function getProfile() {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(n => typeof n === 'string') : [];
+  } catch (e) { return []; }
+}
+function setProfile(arr) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(arr)); } catch (e) {}
+  profile = arr;
+  syncPersonaDot();
+}
+let profile = getProfile();
+
+function syncPersonaDot() {
+  profileBtn.classList.toggle('has-items', profile.length > 0);
+}
+syncPersonaDot();
+
+function findEmotionIndex(name) {
+  // Returns the EI (top-level core-emotion index) for any canonical name —
+  // core, mid-ring, or outer-ring. Used to look up the palette colour.
+  for (let i = 0; i < DATA.length; i++) {
+    const d = DATA[i];
+    if (d.core === name) return i;
+    for (const s of d.secs) {
+      if (s.mid === name) return i;
+      if (s.out.includes(name)) return i;
+    }
   }
+  return -1;
+}
+
+function findSegmentForEmotion(name) {
+  // Returns { t, EI, SI, OI } for any canonical name — used to mirror the
+  // wheel-click snap when launching an emotion from the My emotions list.
+  for (let i = 0; i < DATA.length; i++) {
+    const d = DATA[i];
+    if (d.core === name) return { t: 'c', EI: i, SI: 0, OI: 0 };
+    for (let j = 0; j < d.secs.length; j++) {
+      const s = d.secs[j];
+      if (s.mid === name) return { t: 'm', EI: i, SI: j, OI: 0 };
+      const k = s.out.indexOf(name);
+      if (k !== -1) return { t: 'o', EI: i, SI: j, OI: k };
+    }
+  }
+  return null;
+}
+
+function updateAddButton(name) {
+  const inProfile = profile.includes(name);
+  const isFull    = profile.length >= PROFILE_MAX;
+
+  addBtn.classList.remove('show-full');
+  if (addBtn._fullTimer) { clearTimeout(addBtn._fullTimer); addBtn._fullTimer = null; }
+
+  addBtnLabel.textContent = inProfile ? tUI('removeFromProfile') : tUI('addToProfile');
+  addBtnFullMsg.textContent = tUI('profileFullMsg');
+  // Always clickable — either adds, removes, or shows the "full" message.
+  addBtn.style.display = name ? '' : 'none';
+  addBtn._isFull = isFull && !inProfile;
+}
+
+addBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  if (!_currentEmotion) return;
+  if (profile.includes(_currentEmotion)) {
+    // Toggle off — remove from profile.
+    setProfile(profile.filter(n => n !== _currentEmotion));
+    updateAddButton(_currentEmotion);
+    return;
+  }
+  if (addBtn._isFull) {
+    // Profile full — flash inline message, do not add.
+    addBtn.classList.add('show-full');
+    if (addBtn._fullTimer) clearTimeout(addBtn._fullTimer);
+    addBtn._fullTimer = setTimeout(() => {
+      addBtn.classList.remove('show-full');
+      addBtn._fullTimer = null;
+    }, 2400);
+    return;
+  }
+  setProfile([...profile, _currentEmotion]);
+  updateAddButton(_currentEmotion);
 });
 
-/* ─── AUTO-SPIN ──────────────────────────────────────────────────────────── */
-const spinBtn  = document.getElementById('spin-btn');
-const spinPlay = document.getElementById('spin-play');
-const spinStop = document.getElementById('spin-stop');
-let spinRAF      = null;
-let isSpinning   = false;
-let spinCurrentV = 0; // deg/s — live velocity, updated each frame
-
-// Velocity profile: v(t) = PEAK_V · sin(π·t/T)
-// → zero at start and end, maximum at midpoint (t = T/2)
-// Integrated position: θ(t) = startAngle + PEAK_V·T/π · (1 − cos(π·t/T))
-// Total rotation over full 5 s: PEAK_V · 2T/π ≈ 7.3 full revolutions at 720 deg/s peak
-const SPIN_DURATION = 5000; // ms
-const SPIN_PEAK_V   = 720;  // deg/s at peak — ~2 rev/s
-
-function stopSpin(snap = true) {
-  if (!isSpinning) return;
-  isSpinning = false;
-  if (spinRAF) { cancelAnimationFrame(spinRAF); spinRAF = null; }
-  spinPlay.style.display = '';
-  spinStop.style.display = 'none';
-  spinBtn.setAttribute('aria-label', 'Spin circle');
-  if (snap) {
-    // ratio = 0 → wheel nearly stopped, ratio = 1 → stopped at peak speed
-    const ratio = Math.min(Math.abs(spinCurrentV) / SPIN_PEAK_V, 1);
-    snapAndBounce(16 * ratio); // 0 – 16 degrees of bounce amplitude
+function removeFromProfile(name) {
+  setProfile(profile.filter(n => n !== name));
+  renderProfileOverlay();
+  // If the emotion overlay is currently showing the removed emotion, re-sync its add button
+  if (_currentEmotion && !overlay.hasAttribute('hidden')) {
+    updateAddButton(_currentEmotion);
   }
-  spinCurrentV = 0;
 }
 
-function startSpin() {
-  isSpinning = true;
-  clearAll();
-  cancelMotion();
-  spinPlay.style.display = 'none';
-  spinStop.style.display = '';
-  spinBtn.setAttribute('aria-label', 'Stop spinning');
-  const T          = SPIN_DURATION / 1000;
-  const startAngle = currentRotation;
-  const t0         = performance.now();
-  function step(now) {
-    const elapsed = (now - t0) / 1000;
-    if (elapsed >= T) { stopSpin(true); return; }
-    spinCurrentV = SPIN_PEAK_V * Math.sin(Math.PI * elapsed / T);
-    setRotation(startAngle + SPIN_PEAK_V * T / Math.PI * (1 - Math.cos(Math.PI * elapsed / T)));
-    spinRAF = requestAnimationFrame(step);
+function renderProfileOverlay() {
+  profileTitle.textContent = tUI('myEmotions');
+  if (profile.length === 0) {
+    profileBody.innerHTML = `<p class="profile-empty">${tUI('myEmotionsEmpty')}</p>`;
+    return;
   }
-  spinRAF = requestAnimationFrame(step);
+  const rows = profile.map(name => {
+    const EI = findEmotionIndex(name);
+    const color = EI >= 0 ? DATA[EI].palette.bg : 'transparent';
+    return `
+      <div class="profile-row" data-name="${name.replace(/"/g, '&quot;')}">
+        <span class="swatch" style="background:${color}"></span>
+        <span class="name">${tEmo(name)}</span>
+        <button class="remove" type="button" aria-label="Remove">×</button>
+      </div>`;
+  }).join('');
+  profileBody.innerHTML = `<div class="profile-list">${rows}</div>`;
 }
 
-spinBtn.addEventListener('click', () => {
-  isSpinning ? stopSpin(true) : startSpin();
+// Delegate row remove clicks + row clicks (open emotion)
+profileBody.addEventListener('click', e => {
+  // Remove button takes priority
+  const removeBtn = e.target.closest('.remove');
+  if (removeBtn) {
+    e.stopPropagation();
+    const row = removeBtn.closest('.profile-row');
+    if (row) removeFromProfile(row.dataset.name);
+    return;
+  }
+  // Row click → spin the wheel to the emotion (with bounce, like a wheel-click)
+  // AND open the emotion overlay in vis state via the standard overlay swap.
+  const row = e.target.closest('.profile-row');
+  if (!row) return;
+  const name = row.dataset.name;
+  const seg = findSegmentForEmotion(name);
+  if (!seg) return;
+
+  // Mirror snapToSeg's core: rotate to the segment midpoint with bounce,
+  // and at settle apply the same activeKey / URL / highlight as a wheel-click.
+  let mid;
+  if      (seg.t === 'c') { const e_  = DATA[seg.EI];                                mid = (e_.a0 + e_.a1) / 2; }
+  else if (seg.t === 'm') { const sec = DATA[seg.EI].secs[seg.SI];                   mid = (sec.a0 + sec.a1) / 2; }
+  else                    { const oa  = DATA[seg.EI].secs[seg.SI].outSegs[seg.OI];   mid = (oa[0] + oa[1]) / 2; }
+  const target = currentRotation + shortDelta(-mid, currentRotation);
+  animateRotationTo(target, 1100, () => {
+    activeKey = `${seg.t}:${seg.EI}:${seg.SI}:${seg.OI}`;
+    updateURL(seg.t, seg.EI, seg.SI, seg.OI);
+    applyHighlight(seg.EI, seg.SI, seg.OI, seg.t);
+  });
+
+  // In parallel: dismiss profile → open emotion sheet directly in vis state.
+  switchToOverlay(() => openOverlay(name, seg.EI, { expand: true }));
+});
+
+function openProfile() {
+  renderProfileOverlay();
+  profileOverlay.removeAttribute('hidden');
+  requestAnimationFrame(() => { profileOverlay.classList.add('vis'); setCanvasBlur(true); });
+}
+function closeProfile() { setCanvasBlur(false); animClose(profileOverlay); }
+
+/* Smoothly hand off from one bottom-sheet card to another:
+   1. Animate the current overlay's card down (reuses each overlay's own
+      close path — clearAll() / closeHelp() / closeProfile()).
+   2. Keep the canvas blur on across the swap so the wheel doesn't flicker.
+   3. Wait for the slide-down to clear, then call openFn() to slide the new
+      card up. Delay matches the 0.38 s card transform transition.
+*/
+const SWITCH_DELAY = 380;
+function switchToOverlay(openFn) {
+  const isEmotionOpen = !overlay.hasAttribute('hidden');
+  const isHelpOpen    = !helpOverlay.hasAttribute('hidden');
+  const isProfileOpen = !profileOverlay.hasAttribute('hidden');
+
+  if (!isEmotionOpen && !isHelpOpen && !isProfileOpen) {
+    openFn();
+    return;
+  }
+
+  if (isEmotionOpen) clearAll();           // animated dismiss (peek or vis)
+  if (isHelpOpen)    closeHelp();
+  if (isProfileOpen) closeProfile();
+
+  // Each close just toggled blur off — re-enable in the same frame so
+  // the class is effectively never removed and the wheel doesn't flicker.
+  setCanvasBlur(true);
+
+  setTimeout(openFn, SWITCH_DELAY);
+}
+
+profileBtn.addEventListener('click', () => switchToOverlay(openProfile));
+profileOverlay.addEventListener('click', e => { if (e.target === profileOverlay) closeProfile(); });
+addSheetDrag(profileOverlay, profileCard, closeProfile);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (!overlay.hasAttribute('hidden'))         closeOverlay();
+    if (!helpOverlay.hasAttribute('hidden'))     closeHelp();
+    if (!profileOverlay.hasAttribute('hidden'))  closeProfile();
+    if (langMenuOpen) closeLangMenu();
+  }
 });
 
 /* ─── LANGUAGE SWITCHER ──────────────────────────────────────────────────── */
 
 /* UI strings per language */
 const LANG_DATA = {
-  en: { feel:'I feel…',        wheelTitle:'Circle of Feelings',    hint:'Drag to spin · click to select',        howToUse:'How to use',         similar:'Similar words',            sensations:'Typical sensations',         telling:'What is this telling you?',  helping:'How can this help you?', shareThisFeeling:'Share this feeling', linkCopied:'Link copied', dragOrTapToExplore:'Spin or click to explore' },
-  fr: { feel:'Je ressens…',    wheelTitle:'Cercle des sentiments',  hint:'Tournez · touchez pour choisir',         howToUse:"Mode d'emploi",      similar:'Mots similaires',          sensations:'Sensations typiques',        telling:'Que vous dit cela\u00a0?',   helping:'Comment cela peut-il vous aider\u00a0?', shareThisFeeling:'Partager ce sentiment', linkCopied:'Lien copi\u00e9', dragOrTapToExplore:'Tournez ou cliquez pour explorer' },
-  es: { feel:'Siento…',        wheelTitle:'Círculo de sentimientos',   hint:'Gira · toca para elegir',                howToUse:'Cómo usar',           similar:'Palabras similares',       sensations:'Sensaciones típicas',        telling:'¿Qué te dice esto?',         helping:'¿Cómo puede ayudarte?', shareThisFeeling:'Compartir este sentimiento', linkCopied:'Enlace copiado', dragOrTapToExplore:'Gira o haz clic para explorar' },
-  de: { feel:'Ich fühle…',     wheelTitle:'Gefühlskreis',         hint:'Drehen · klicken zum Wählen',            howToUse:'Anleitung',           similar:'Ähnliche Wörter',          sensations:'Typische Empfindungen',      telling:'Was sagt dir das?',          helping:'Wie kann dir das helfen?', shareThisFeeling:'Dieses Gefühl teilen', linkCopied:'Link kopiert', dragOrTapToExplore:'Drehen oder klicken zum Erkunden' },
-  pt: { feel:'Eu sinto…',      wheelTitle:'Círculo dos sentimentos',    hint:'Gire · clique para selecionar',          howToUse:'Como usar',           similar:'Palavras similares',       sensations:'Sensações típicas',          telling:'O que isso te diz?',         helping:'Como isso pode te ajudar?', shareThisFeeling:'Compartilhar este sentimento', linkCopied:'Link copiado', dragOrTapToExplore:'Gire ou clique para explorar' },
-  nl: { feel:'Ik voel…',       wheelTitle:'Gevoelscirkel',           hint:'Draai · klik om te kiezen',              howToUse:'Hoe te gebruiken',    similar:'Vergelijkbare woorden',    sensations:'Typische sensaties',         telling:'Wat vertelt dit je?',        helping:'Hoe kan dit je helpen?', shareThisFeeling:'Dit gevoel delen', linkCopied:'Link gekopieerd', dragOrTapToExplore:'Draai of klik om te verkennen' },
-  it: { feel:'Mi sento…',      wheelTitle:'Cerchio dei sentimenti',hint:'Trascina · clicca per scegliere',        howToUse:'Come usare',          similar:'Parole simili',            sensations:'Sensazioni tipiche',         telling:'Cosa ti sta dicendo?',       helping:'Come può aiutarti?', shareThisFeeling:'Condividi questo sentimento', linkCopied:'Link copiato', dragOrTapToExplore:'Ruota o clicca per esplorare' },
-  ja: { feel:'今の気持ち…',    wheelTitle:'気持ちの輪',          hint:'ドラッグで回転・クリックで選択',          howToUse:'使い方',              similar:'類似する言葉',             sensations:'典型的な感覚',               telling:'これはあなたに何を伝えていますか？', helping:'これはどのように役立ちますか？', shareThisFeeling:'この気持ちを共有', linkCopied:'リンクをコピーしました', dragOrTapToExplore:'回すかクリックして探索' },
-  zh: { feel:'我感到…',        wheelTitle:'感受圆圈',              hint:'拖动旋转 · 点击选择',                    howToUse:'使用说明',             similar:'相似词语',                 sensations:'典型感受',                   telling:'这在告诉你什么？',           helping:'这如何帮助你？', shareThisFeeling:'分享这份感受', linkCopied:'已复制链接', dragOrTapToExplore:'旋转或点击探索' },
-  ar: { feel:'أشعر…',          wheelTitle:'دائرة المشاعر',        hint:'اسحب للتدوير · انقر للاختيار',           howToUse:'كيفية الاستخدام',     similar:'كلمات مماثلة',             sensations:'الأحاسيس النموذجية',        telling:'ماذا يخبرك هذا؟',           helping:'كيف يمكن أن يساعدك هذا؟', shareThisFeeling:'شارك هذا الشعور', linkCopied:'تم نسخ الرابط', dragOrTapToExplore:'أدر أو انقر للاستكشاف' },
-  fa: { feel:'احساس می‌کنم…',  wheelTitle:'دایره احساسات',        hint:'بکشید تا بچرخد · کلیک کنید',            howToUse:'نحوه استفاده',        similar:'کلمات مشابه',              sensations:'احساسات معمول',              telling:'این به شما چه می‌گوید؟',    helping:'این چطور کمک می‌کند؟', shareThisFeeling:'این احساس را به اشتراک بگذارید', linkCopied:'پیوند کپی شد', dragOrTapToExplore:'بچرخانید یا کلیک کنید تا کاوش کنید' },
+  en: { feel:'I feel…',        wheelTitle:'Circle of Feelings',    hint:'Drag to spin · click to select',        howToUse:'How to use',         similar:'Similar words',            sensations:'Typical sensations',         telling:'What is this telling you?',  helping:'How can this help you?', shareThisFeeling:'Share this feeling', linkCopied:'Link copied', dragOrTapToExplore:'Spin or click to explore', myEmotions:'My emotions', myEmotionsEmpty:'Added emotions appear here', addToProfile:'Add to my emotions', removeFromProfile:'Remove from my emotions', profileFullMsg:'5 max — remove one first' },
+  fr: { feel:'Je ressens…',    wheelTitle:'Cercle des sentiments',  hint:'Tournez · touchez pour choisir',         howToUse:"Mode d'emploi",      similar:'Mots similaires',          sensations:'Sensations typiques',        telling:'Que vous dit cela\u00a0?',   helping:'Comment cela peut-il vous aider\u00a0?', shareThisFeeling:'Partager ce sentiment', linkCopied:'Lien copi\u00e9', dragOrTapToExplore:'Tournez ou cliquez pour explorer', myEmotions:'Mes émotions', myEmotionsEmpty:'Les émotions ajoutées apparaissent ici', addToProfile:'Ajouter à mes émotions', removeFromProfile:'Retirer de mes émotions', profileFullMsg:'5 max — retirez-en une d’abord' },
+  es: { feel:'Siento…',        wheelTitle:'Círculo de sentimientos',   hint:'Gira · toca para elegir',                howToUse:'Cómo usar',           similar:'Palabras similares',       sensations:'Sensaciones típicas',        telling:'¿Qué te dice esto?',         helping:'¿Cómo puede ayudarte?', shareThisFeeling:'Compartir este sentimiento', linkCopied:'Enlace copiado', dragOrTapToExplore:'Gira o haz clic para explorar', myEmotions:'Mis emociones', myEmotionsEmpty:'Las emociones añadidas aparecen aquí', addToProfile:'Añadir a mis emociones', removeFromProfile:'Quitar de mis emociones', profileFullMsg:'5 máx — elimina una primero' },
+  de: { feel:'Ich fühle…',     wheelTitle:'Gefühlskreis',         hint:'Drehen · klicken zum Wählen',            howToUse:'Anleitung',           similar:'Ähnliche Wörter',          sensations:'Typische Empfindungen',      telling:'Was sagt dir das?',          helping:'Wie kann dir das helfen?', shareThisFeeling:'Dieses Gefühl teilen', linkCopied:'Link kopiert', dragOrTapToExplore:'Drehen oder klicken zum Erkunden', myEmotions:'Meine Gefühle', myEmotionsEmpty:'Hinzugefügte Gefühle erscheinen hier', addToProfile:'Zu meinen Gefühlen hinzufügen', removeFromProfile:'Aus meinen Gefühlen entfernen', profileFullMsg:'Max. 5 — entferne zuerst eine' },
+  pt: { feel:'Eu sinto…',      wheelTitle:'Círculo dos sentimentos',    hint:'Gire · clique para selecionar',          howToUse:'Como usar',           similar:'Palavras similares',       sensations:'Sensações típicas',          telling:'O que isso te diz?',         helping:'Como isso pode te ajudar?', shareThisFeeling:'Compartilhar este sentimento', linkCopied:'Link copiado', dragOrTapToExplore:'Gire ou clique para explorar', myEmotions:'Minhas emoções', myEmotionsEmpty:'As emoções adicionadas aparecem aqui', addToProfile:'Adicionar às minhas emoções', removeFromProfile:'Remover das minhas emoções', profileFullMsg:'5 máx — remova uma primeiro' },
+  nl: { feel:'Ik voel…',       wheelTitle:'Gevoelscirkel',           hint:'Draai · klik om te kiezen',              howToUse:'Hoe te gebruiken',    similar:'Vergelijkbare woorden',    sensations:'Typische sensaties',         telling:'Wat vertelt dit je?',        helping:'Hoe kan dit je helpen?', shareThisFeeling:'Dit gevoel delen', linkCopied:'Link gekopieerd', dragOrTapToExplore:'Draai of klik om te verkennen', myEmotions:'Mijn emoties', myEmotionsEmpty:'Toegevoegde emoties verschijnen hier', addToProfile:'Toevoegen aan mijn emoties', removeFromProfile:'Verwijderen uit mijn emoties', profileFullMsg:'Max 5 — verwijder eerst één' },
+  it: { feel:'Mi sento…',      wheelTitle:'Cerchio dei sentimenti',hint:'Trascina · clicca per scegliere',        howToUse:'Come usare',          similar:'Parole simili',            sensations:'Sensazioni tipiche',         telling:'Cosa ti sta dicendo?',       helping:'Come può aiutarti?', shareThisFeeling:'Condividi questo sentimento', linkCopied:'Link copiato', dragOrTapToExplore:'Ruota o clicca per esplorare', myEmotions:'Le mie emozioni', myEmotionsEmpty:'Le emozioni aggiunte appaiono qui', addToProfile:'Aggiungi alle mie emozioni', removeFromProfile:'Rimuovi dalle mie emozioni', profileFullMsg:'Max 5 — rimuovi prima una' },
+  ja: { feel:'今の気持ち…',    wheelTitle:'気持ちの輪',          hint:'ドラッグで回転・クリックで選択',          howToUse:'使い方',              similar:'類似する言葉',             sensations:'典型的な感覚',               telling:'これはあなたに何を伝えていますか？', helping:'これはどのように役立ちますか？', shareThisFeeling:'この気持ちを共有', linkCopied:'リンクをコピーしました', dragOrTapToExplore:'回すかクリックして探索', myEmotions:'マイ感情', myEmotionsEmpty:'追加された感情はここに表示されます', addToProfile:'マイ感情に追加', removeFromProfile:'マイ感情から削除', profileFullMsg:'5つまで — 先に1つ削除してください' },
+  zh: { feel:'我感到…',        wheelTitle:'感受圆圈',              hint:'拖动旋转 · 点击选择',                    howToUse:'使用说明',             similar:'相似词语',                 sensations:'典型感受',                   telling:'这在告诉你什么？',           helping:'这如何帮助你？', shareThisFeeling:'分享这份感受', linkCopied:'已复制链接', dragOrTapToExplore:'旋转或点击探索', myEmotions:'我的情感', myEmotionsEmpty:'添加的情感会显示在这里', addToProfile:'添加到我的情感', removeFromProfile:'从我的情感中移除', profileFullMsg:'最多 5 个 — 请先移除一个' },
+  ar: { feel:'أشعر…',          wheelTitle:'دائرة المشاعر',        hint:'اسحب للتدوير · انقر للاختيار',           howToUse:'كيفية الاستخدام',     similar:'كلمات مماثلة',             sensations:'الأحاسيس النموذجية',        telling:'ماذا يخبرك هذا؟',           helping:'كيف يمكن أن يساعدك هذا؟', shareThisFeeling:'شارك هذا الشعور', linkCopied:'تم نسخ الرابط', dragOrTapToExplore:'أدر أو انقر للاستكشاف', myEmotions:'مشاعري', myEmotionsEmpty:'تظهر المشاعر المضافة هنا', addToProfile:'إضافة إلى مشاعري', removeFromProfile:'إزالة من مشاعري', profileFullMsg:'الحد الأقصى 5 — أزل واحدة أولاً' },
+  fa: { feel:'احساس می‌کنم…',  wheelTitle:'دایره احساسات',        hint:'بکشید تا بچرخد · کلیک کنید',            howToUse:'نحوه استفاده',        similar:'کلمات مشابه',              sensations:'احساسات معمول',              telling:'این به شما چه می‌گوید؟',    helping:'این چطور کمک می‌کند؟', shareThisFeeling:'این احساس را به اشتراک بگذارید', linkCopied:'پیوند کپی شد', dragOrTapToExplore:'بچرخانید یا کلیک کنید تا کاوش کنید', myEmotions:'احساسات من', myEmotionsEmpty:'احساسات اضافه‌شده اینجا نمایش داده می‌شوند', addToProfile:'افزودن به احساسات من', removeFromProfile:'حذف از احساسات من', profileFullMsg:'حداکثر ۵ — ابتدا یکی را حذف کنید' },
 };
 
 /* Emotion translation table — columns: en, fr, es, de, pt, nl, it, ja, zh, ar, fa */
@@ -4355,12 +4595,16 @@ function setLanguage(lang) {
   if (activeKey) {
     const parts = activeKey.split(':');
     const t = parts[0], EI = +parts[1], SI = +parts[2], OI = +parts[3];
-    setBreadcrumb(EI, SI, OI, t);
+    openEmotionByIndex(EI, SI, OI, t);
   }
   document.querySelectorAll('.lang-opt').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.lang === lang);
   });
   if (!helpOverlay.hasAttribute('hidden')) renderHelpOverlay();
+  if (!profileOverlay.hasAttribute('hidden')) renderProfileOverlay();
+  profileBtn.setAttribute('aria-label', tUI('myEmotions'));
+  // Re-sync the add button label if an emotion is currently displayed
+  if (_currentEmotion && !overlay.hasAttribute('hidden')) updateAddButton(_currentEmotion);
   // persist language in URL search param (?lang=xx); omit for default English
   const _url = new URL(location.href);
   if (lang === 'en') { _url.searchParams.delete('lang'); }
@@ -4382,7 +4626,7 @@ document.addEventListener('click', () => { if (langMenuOpen) closeLangMenu(); })
 
 /* ─── DEEP-LINK ON LOAD ──────────────────────────────────────────────────── */
 (function applyHashOnLoad() {
-  // restore language first so wheel labels and breadcrumb render in the right locale
+  // restore language first so wheel labels render in the right locale
   const langParam = new URLSearchParams(location.search).get('lang');
   if (langParam && LANG_DATA[langParam]) setLanguage(langParam);
 

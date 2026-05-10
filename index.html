@@ -547,16 +547,22 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
 }
 .profile-row {
   display: flex; align-items: center;
-  gap: 12px;
+  gap: 14px;
   padding: 12px 14px;
   border: 1px solid var(--card-border);
   border-radius: 12px;
   background: var(--surface);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
+.profile-row:hover { background: var(--btn-hover); }
+.profile-row:active { background: var(--tab-active); }
 .profile-row .swatch {
-  width: 18px; height: 18px;
+  width: 22px; height: 22px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.08);
 }
 .profile-row .name {
   flex: 1;
@@ -3773,13 +3779,24 @@ function renderProfileOverlay() {
   profileBody.innerHTML = `<div class="profile-list">${rows}</div>`;
 }
 
-// Delegate row remove clicks
+// Delegate row remove clicks + row clicks (open emotion)
 profileBody.addEventListener('click', e => {
-  const btn = e.target.closest('.remove');
-  if (!btn) return;
-  const row = btn.closest('.profile-row');
+  // Remove button takes priority
+  const removeBtn = e.target.closest('.remove');
+  if (removeBtn) {
+    e.stopPropagation();
+    const row = removeBtn.closest('.profile-row');
+    if (row) removeFromProfile(row.dataset.name);
+    return;
+  }
+  // Row click → open the corresponding emotion overlay
+  const row = e.target.closest('.profile-row');
   if (!row) return;
-  removeFromProfile(row.dataset.name);
+  const name = row.dataset.name;
+  const EI = findEmotionIndex(name);
+  if (EI < 0) return;
+  closeProfile();
+  openOverlay(name, EI);
 });
 
 function openProfile() {

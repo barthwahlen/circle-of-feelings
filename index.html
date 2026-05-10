@@ -354,7 +354,7 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   position: fixed; inset: 0;
   background: transparent;
   display: flex; align-items: flex-end; justify-content: center;
-  z-index: 2000; padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
+  z-index: 2000; padding: 0;
   opacity: 0;
   transition: opacity 0.22s ease;
 }
@@ -367,9 +367,9 @@ html[data-theme="light"] .wheel-base { box-shadow: none !important; }
   border: 1px solid var(--card-border);
   border-bottom: none;
   border-radius: 20px 20px 0 0;
-  max-height: min(92dvh, 900px);
+  max-height: 92dvh;
   width: min(100vw, 640px);
-  padding: 16px clamp(32px, 4vw, 64px) clamp(36px, 3.5vw, 56px);
+  padding: 16px clamp(32px, 4vw, 64px) calc(clamp(28px, 3vw, 44px) + env(safe-area-inset-bottom, 0px));
   display: flex; flex-direction: column;
   position: relative; z-index: 1;
   color: var(--text);

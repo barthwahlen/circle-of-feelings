@@ -3572,14 +3572,11 @@ function hideOverlay() {
       anim.cancel(); // remove fill, hand back to CSS
     };
   } else {
-    // vis state: remove class → card slides to translateY(100%), backdrop fades.
-    overlay.classList.remove('vis');
-    setCanvasBlur(false);
+    // vis state: clear any leftover inline transform from drag, then dismiss
+    // via the same path as info / profile so the card slides down identically.
     overlayCard.style.transform = '';
-    overlayCard.addEventListener('transitionend', function h() {
-      overlayCard.removeEventListener('transitionend', h);
-      overlay.setAttribute('hidden', '');
-    });
+    setCanvasBlur(false);
+    animClose(overlay);
   }
 }
 function closeOverlay() {

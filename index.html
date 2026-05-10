@@ -3589,7 +3589,6 @@ overlay.addEventListener('click', e => { if (e.target === overlay) closeOverlay(
 const helpOverlay = document.getElementById('help-overlay');
 
 function openHelp() {
-  clearAll(true);   // dismiss emotion overlay instantly if open
   renderHelpOverlay();
   helpOverlay.removeAttribute('hidden');
   requestAnimationFrame(() => { helpOverlay.classList.add('vis'); setCanvasBlur(true); });
@@ -3598,7 +3597,7 @@ function openHelp() {
 function closeHelp() { setCanvasBlur(false); animClose(helpOverlay); }
 addSheetDrag(helpOverlay, document.getElementById('help-card'), closeHelp);
 
-document.getElementById('help-btn').addEventListener('click', openHelp);
+document.getElementById('help-btn').addEventListener('click', () => switchToOverlay(openHelp));
 helpOverlay.addEventListener('click', e => { if (e.target === helpOverlay) closeHelp(); });
 
 /* ─── HELP OVERLAY RENDER ────────────────────────────────────────────────── */
@@ -3800,20 +3799,46 @@ profileBody.addEventListener('click', e => {
   const name = row.dataset.name;
   const EI = findEmotionIndex(name);
   if (EI < 0) return;
-  closeProfile();
-  openOverlay(name, EI);
+  switchToOverlay(() => openOverlay(name, EI));
 });
 
 function openProfile() {
-  clearAll(true);                   // dismiss emotion overlay instantly if open
-  if (!helpOverlay.hasAttribute('hidden')) closeHelp();
   renderProfileOverlay();
   profileOverlay.removeAttribute('hidden');
   requestAnimationFrame(() => { profileOverlay.classList.add('vis'); setCanvasBlur(true); });
 }
 function closeProfile() { setCanvasBlur(false); animClose(profileOverlay); }
 
-profileBtn.addEventListener('click', openProfile);
+/* Smoothly hand off from one bottom-sheet card to another:
+   1. Animate the current overlay's card down (reuses each overlay's own
+      close path — clearAll() / closeHelp() / closeProfile()).
+   2. Keep the canvas blur on across the swap so the wheel doesn't flicker.
+   3. Wait for the slide-down to clear, then call openFn() to slide the new
+      card up. Delay matches the 0.38 s card transform transition.
+*/
+const SWITCH_DELAY = 380;
+function switchToOverlay(openFn) {
+  const isEmotionOpen = !overlay.hasAttribute('hidden');
+  const isHelpOpen    = !helpOverlay.hasAttribute('hidden');
+  const isProfileOpen = !profileOverlay.hasAttribute('hidden');
+
+  if (!isEmotionOpen && !isHelpOpen && !isProfileOpen) {
+    openFn();
+    return;
+  }
+
+  if (isEmotionOpen) clearAll();           // animated dismiss (peek or vis)
+  if (isHelpOpen)    closeHelp();
+  if (isProfileOpen) closeProfile();
+
+  // Each close just toggled blur off — re-enable in the same frame so
+  // the class is effectively never removed and the wheel doesn't flicker.
+  setCanvasBlur(true);
+
+  setTimeout(openFn, SWITCH_DELAY);
+}
+
+profileBtn.addEventListener('click', () => switchToOverlay(openProfile));
 profileOverlay.addEventListener('click', e => { if (e.target === profileOverlay) closeProfile(); });
 addSheetDrag(profileOverlay, profileCard, closeProfile);
 
